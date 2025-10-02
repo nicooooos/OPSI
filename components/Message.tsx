@@ -70,19 +70,3 @@ export const Message: React.FC<MessageProps> = ({ message, onVisualize, index })
     </div>
   );
 };
-
-// Add fade-in animation to tailwind config (or in a style tag if needed)
-// For this setup, we'll assume a global style or a setup that processes this.
-// A simple way is to add a style tag in index.html, but let's define the class here.
-// In a real project, this would be in a CSS file.
-const style = document.createElement('style');
-style.innerHTML = `
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-`;
-document.head.appendChild(style);

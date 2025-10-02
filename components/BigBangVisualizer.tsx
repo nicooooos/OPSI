@@ -62,8 +62,15 @@ export const BigBangVisualizer: React.FC = () => {
                         <span className="text-xl font-semibold">Start Journey</span>
                      </button>
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
-                        <p className="text-slate-500 text-2xl font-mono animate-pulse">[ Video Placeholder ]</p>
+                    <div className="w-full h-full flex items-center justify-center bg-black rounded-lg overflow-hidden">
+                        <iframe
+                            className="w-full h-full"
+                            src="https://www.youtube.com/embed/Da9O4oFxVvI?autoplay=1&mute=1&loop=1&playlist=Da9O4oFxVvI&controls=0"
+                            title="The Big Bang: A Visual Journey"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
                     </div>
                 )}
             </div>

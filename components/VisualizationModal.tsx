@@ -18,7 +18,7 @@ export const VisualizationModal: React.FC<VisualizationModalProps> = ({ isOpen, 
 
   return (
     <div 
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in-fast"
+      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in-fast-modal"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
@@ -58,15 +58,6 @@ export const VisualizationModal: React.FC<VisualizationModalProps> = ({ isOpen, 
             />
         )}
       </div>
-      <style>{`
-        @keyframes fadeInFast {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in-fast {
-          animation: fadeInFast 0.2s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

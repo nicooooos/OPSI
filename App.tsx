@@ -30,7 +30,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onClose }) => {
 
   return (
     <div
-      className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-md p-4 animate-fade-in-fast"
+      className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-md p-4 animate-fade-in-fast-popup"
       role="alert"
     >
       <div className="bg-red-900/80 backdrop-blur-md border border-red-600 rounded-lg shadow-2xl text-white p-4 flex items-start gap-4">
@@ -49,15 +49,6 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onClose }) => {
           <CloseIcon />
         </button>
       </div>
-       <style>{`
-        @keyframes fadeInFast {
-          from { opacity: 0; transform: translate(-50%, -20px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .animate-fade-in-fast {
-          animation: fadeInFast 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
