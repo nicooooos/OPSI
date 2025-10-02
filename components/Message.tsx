@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import type { ChatMessage } from '../types';
 import { MessageRole } from '../types';
 import { UserIcon, AstroIcon, VisualizeIcon } from './Icons';
@@ -40,7 +43,13 @@ export const Message: React.FC<MessageProps> = ({ message, onVisualize, index })
          </div>
       )}
       <div className={`relative max-w-xl lg:max-w-3xl p-4 rounded-xl shadow-lg border-2 border-transparent ${bubbleClasses}`}>
-        <ReactMarkdown components={markdownStyles}>{message.content}</ReactMarkdown>
+        <ReactMarkdown 
+            remarkPlugins={[remarkMath]} 
+            rehypePlugins={[rehypeKatex]} 
+            components={markdownStyles}
+        >
+            {message.content}
+        </ReactMarkdown>
         {/* Show visualize button only on model messages, on hover, when there's content, and it's not the very first greeting message (index > 0) */}
         {isModel && isHovered && message.content && index > 0 && (
             <button
