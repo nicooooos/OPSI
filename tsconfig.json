@@ -21,13 +21,12 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src",
+    "vite.config.ts",
     "index.tsx",
     "App.tsx",
     "types.ts",
-    "services",
-    "components",
-    "vite.config.ts"
+    "components/**/*.tsx",
+    "services/**/*.ts"
   ],
   "references": [
     {

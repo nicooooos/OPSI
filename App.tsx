@@ -93,11 +93,11 @@ const App: React.FC = () => {
       setError(null); // Clear previous errors
     } catch (e) {
        if (e instanceof Error) {
+            // Fix: Updated error check to look for "API_KEY" and updated the user-facing message.
             if (e.message.includes("API_KEY")) {
                 setError({
                     title: 'API Key Not Found',
-                    // Fix: Update error message to refer to API_KEY as per guidelines.
-                    message: 'The Gemini API key is missing. Please ensure it is configured as API_KEY in your environment.'
+                    message: 'The Gemini API key is missing. Please ensure it is configured as API_KEY in your environment (e.g., in Vercel settings).'
                 });
             } else {
                 setError({
