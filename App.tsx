@@ -12,6 +12,7 @@ import { EducationLevelSelector } from './components/EducationLevelSelector';
 import { VisualizationModal } from './components/VisualizationModal';
 import { BigBangVisualizer } from './components/BigBangVisualizer';
 import { CloseIcon, WarningIcon } from './components/Icons';
+import { PromptSuggestions } from './components/PromptSuggestions';
 
 // --- Helper Component for Error Display ---
 interface AppError {
@@ -215,6 +216,9 @@ const App: React.FC = () => {
               <Header onBack={handleBack} />
               <main className="flex-1 flex flex-col p-4 overflow-y-auto">
                 <ChatWindow messages={messages} isLoading={isLoading} onVisualize={handleOpenVizModal} />
+                {messages.length === 1 && !isLoading && (
+                  <PromptSuggestions onPromptClick={handleSendMessage} />
+                )}
               </main>
               <footer className="p-4 border-t border-slate-700">
                 <InputBar onSendMessage={handleSendMessage} isLoading={isLoading} />
