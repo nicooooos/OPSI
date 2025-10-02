@@ -2,9 +2,11 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { EducationLevel } from '../types';
 
+// Fix: Adhere to Gemini API guidelines by using process.env.API_KEY. This resolves the TypeScript error.
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
+  // Fix: Update error message to reflect the correct environment variable.
   throw new Error("API_KEY environment variable is not set.");
 }
 

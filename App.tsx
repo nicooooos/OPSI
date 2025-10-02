@@ -96,7 +96,8 @@ const App: React.FC = () => {
             if (e.message.includes("API_KEY")) {
                 setError({
                     title: 'API Key Not Found',
-                    message: 'The Gemini API key is missing. Please ensure it is configured correctly in your environment.'
+                    // Fix: Update error message to refer to API_KEY as per guidelines.
+                    message: 'The Gemini API key is missing. Please ensure it is configured as API_KEY in your environment.'
                 });
             } else {
                 setError({
