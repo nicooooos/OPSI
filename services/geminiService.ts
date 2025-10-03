@@ -1,6 +1,6 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { EducationLevel } from '../types';
-import type { CosmicEvent } from "../components/CosmicTimeline";
+import type { CosmicEvent } from "../i18n/translations";
 
 // Fix: Use process.env.API_KEY as per the guidelines to resolve TypeScript error and align with requirements.
 const API_KEY = process.env.API_KEY;
@@ -24,9 +24,13 @@ const levelInstructions: Record<EducationLevel, string> = {
   'Intermediate': "You are speaking to a university-level student. Provide detailed, in-depth answers. You can use complex terminology and assume a strong foundation in physics and mathematics. Your answers should be precise, comprehensive, and suitable for someone studying astronomy or a related field."
 };
 
+const languageInstructions = {
+    'en': "Important: Your entire response must be in English.",
+    'id': "Important: Your entire response must be in Indonesian."
+};
 
-export const createChatSession = (level: EducationLevel): Chat => {
-  const systemInstruction = `${baseInstruction}\n\n**Audience Level Context:**\n${levelInstructions[level]}`;
+export const createChatSession = (level: EducationLevel, lang: 'en' | 'id'): Chat => {
+  const systemInstruction = `${baseInstruction}\n\n**Audience Level Context:**\n${levelInstructions[level]}\n\n**Language:**\n${languageInstructions[lang]}`;
   
   const chat = ai.chats.create({
     model: 'gemini-2.5-flash',

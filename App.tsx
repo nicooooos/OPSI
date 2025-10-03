@@ -12,6 +12,7 @@ import { EducationLevelSelector } from './components/EducationLevelSelector';
 import { CosmicTimeline } from './components/CosmicTimeline';
 import { CloseIcon, WarningIcon } from './components/Icons';
 import { PromptSuggestions } from './components/PromptSuggestions';
+import { useTranslations } from './contexts/LanguageContext';
 
 // --- Helper Component for Error Display ---
 interface AppError {
@@ -52,6 +53,25 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onClose }) => {
   );
 };
 
+const LanguageSwitcher: React.FC = () => {
+    const { language, setLanguage } = useTranslations();
+
+    return (
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+            <button onClick={() => setLanguage('en')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'en' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>EN</button>
+            <button onClick={() => setLanguage('id')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'id' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>ID</button>
+        </div>
+    );
+};
+
+const Footer: React.FC = () => {
+    return (
+        <footer className="w-full text-center py-4 z-10">
+            <p className="text-slate-500 text-sm">OPSI 2025 - Astro Synergy</p>
+        </footer>
+    );
+};
+
 
 const App: React.FC = () => {
   const [chat, setChat] = useState<Chat | null>(null);
@@ -59,6 +79,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<AppError | null>(null);
   const [educationLevel, setEducationLevel] = useState<EducationLevel | null>(null);
+  const { language, t } = useTranslations();
 
   const handleDismissError = useCallback(() => {
     setError(null);
@@ -66,38 +87,37 @@ const App: React.FC = () => {
 
   const handleSelectLevel = useCallback((level: EducationLevel) => {
     try {
-      const chatSession = createChatSession(level);
+      const chatSession = createChatSession(level, language);
       setChat(chatSession);
       setMessages([
         {
           role: MessageRole.MODEL,
-          content: "Greetings! I am AstroChat AI. Ask me anything about the vast, wondrous universe. What cosmic mystery is on your mind today?",
+          content: t.astroChatGreeting,
         },
       ]);
       setEducationLevel(level);
       setError(null); // Clear previous errors
     } catch (e) {
        if (e instanceof Error) {
-            // Fix: Updated error check to look for "API_KEY" and updated the user-facing message.
             if (e.message.includes("API_KEY")) {
                 setError({
-                    title: 'API Key Not Found',
-                    message: 'The Gemini API key is missing. Please ensure it is configured as API_KEY in your environment (e.g., in Vercel settings).'
+                    title: t.errorApiKeyNotFoundTitle,
+                    message: t.errorApiKeyNotFoundMessage
                 });
             } else {
                 setError({
-                    title: 'Initialization Failed',
-                    message: `An unexpected error occurred: ${e.message}`
+                    title: t.errorInitializationFailedTitle,
+                    message: `${t.errorUnexpectedErrorMessage} ${e.message}`
                 });
             }
        } else {
           setError({
-            title: 'Unknown Error',
-            message: 'An unknown error occurred during initialization.'
+            title: t.errorUnknownErrorTitle,
+            message: t.errorUnknownErrorMessage
           });
        }
     }
-  }, []);
+  }, [language, t]);
   
   const handleBack = useCallback(() => {
     setEducationLevel(null);
@@ -115,7 +135,6 @@ const App: React.FC = () => {
     const userMessage: ChatMessage = { role: MessageRole.USER, content: text };
     setMessages(prev => [...prev, userMessage]);
     
-    // Add empty placeholder for streaming
     setMessages(prev => [...prev, { role: MessageRole.MODEL, content: "" }]);
 
     try {
@@ -136,36 +155,35 @@ const App: React.FC = () => {
         });
       }
     } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred.";
+        const errorMessage = e instanceof Error ? e.message : t.errorUnexpectedErrorMessage;
         if (errorMessage.toLowerCase().includes('api key not valid')) {
              setError({
-                title: 'Authentication Error',
-                message: 'Your Gemini API key appears to be invalid or has expired. Please check your credentials.'
+                title: t.errorAuthErrorTitle,
+                message: t.errorAuthErrorMessage
              });
         } else {
              setError({
-                title: 'Message Failed to Send',
-                message: `A cosmic anomaly occurred: ${errorMessage}`
+                title: t.errorFailedToSendTitle,
+                message: `${t.errorCosmicAnomaly} ${errorMessage}`
              });
         }
-        // Remove the optimistic empty model message
         setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
-  }, [chat, isLoading]);
+  }, [chat, isLoading, t]);
 
   return (
     <div className="relative flex flex-col min-h-screen w-screen overflow-x-hidden antialiased bg-slate-900 text-white">
       <StarryBackground />
+      <LanguageSwitcher />
       <ErrorDisplay error={error} onClose={handleDismissError} />
       
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24 z-10 flex flex-col gap-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 z-10 flex flex-col gap-12">
         <CosmicTimeline />
 
         <div className="border-t-2 border-dashed border-slate-700/50" aria-hidden="true"></div>
         
-        {/* AstroChat AI Section Wrapper */}
         <div id="astrochat-section" className="min-h-[80vh] flex flex-col bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
           {!educationLevel ? (
             <EducationLevelSelector onSelectLevel={handleSelectLevel} />
@@ -185,6 +203,7 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

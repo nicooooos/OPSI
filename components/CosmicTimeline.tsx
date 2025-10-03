@@ -3,144 +3,62 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
 import { SparklesIcon } from './Icons';
 import { LoadingIndicator } from './LoadingIndicator';
-
-
-// --- Data for the Timeline ---
-export interface CosmicEvent {
-  time: number; // Years after Big Bang
-  name: string;
-  description: string;
-  visualizationPrompt: string;
-  funFacts: string[];
-}
-
-const events: CosmicEvent[] = [
-  { 
-    time: 1, 
-    name: 'The Big Bang', 
-    description: 'The universe erupts from a singularity of infinite density. A period of exponential \'inflation\' occurs, expanding spacetime faster than light and laying the foundation for all future structures.',
-    visualizationPrompt: 'The visualization begins in absolute nothingness, a pure black canvas. Suddenly, a single point of infinitesimally small, infinitely bright white light appears and, in a fraction of an instant, explodes outward not as shrapnel, but as the fabric of space itself expanding at an unbelievable rate. This **Inflation** fills the rapidly growing canvas with a chaotic, superheated, and opaque soup of fundamental particles, visualized as a swirling, high-energy plasma of vibrant magentas, electric blues, and scorching whites. Within this roiling sea of energy, countless tiny, flickering points representing quarks and electrons dart and annihilate, creating a scene of pure, untamed cosmic energy before the universe began to cool and structure could form.',
-    funFacts: [
-      "The Big Bang wasn't an explosion *in* space, but rather the expansion *of* space itself everywhere at once.",
-      "For a tiny fraction of a second, the universe expanded faster than the speed of light during a period called Cosmic Inflation.",
-      "Everything in the entire known universe was once compressed into a space smaller than a single atom."
-    ]
-  },
-  { 
-    time: 380_000, 
-    name: 'Recombination', 
-    description: 'Roughly 380,000 years later, the universe cools sufficiently for electrons and protons to combine into the first neutral atoms (mostly hydrogen). This allows photons to travel freely for the first time, creating the Cosmic Microwave Background radiation we can still detect today.',
-    visualizationPrompt: 'After 380,000 years of cooling, the canvas transitions from a chaotic plasma to a dense, uniform, glowing orange fog, representing a universe where light is trapped, constantly scattering off free-roaming protons and electrons. As the scene cools further, the color shifts from orange to a deep red. Then, a fundamental change sweeps across the view: the tiny electron points are captured by the larger proton points, forming neutral hydrogen atoms. As each atom forms, the opaque fog around it instantly vanishes, rendering space transparent. This clearing happens everywhere at once, releasing the trapped light as a faint, uniform, all-sky glow—the Cosmic Microwave Background—visualized as a subtle, mottled pattern of ancient light that now permanently fills the background of the dark, transparent universe.',
-    funFacts: [
-      "The Cosmic Microwave Background is the 'afterglow' of the Big Bang, a fossil light that we can still detect in every direction.",
-      "Before Recombination, the universe was opaque, like being inside a thick fog, because light couldn't travel far without hitting a particle.",
-      "The temperature of the universe at this time was about 3,000°C, similar to the surface of a red giant star."
-    ]
-  },
-  { 
-    time: 400_000_000, 
-    name: 'First Stars Ignite', 
-    description: 'Gravity pulls vast clouds of primordial gas together until they collapse, triggering nuclear fusion in their cores. This ignites the very first stars, which are massive, incredibly bright, and short-lived, ending the Cosmic Dark Ages.',
-    visualizationPrompt: 'The view shows a vast, dark canvas representing the "Dark Ages," filled with immense, slow-drifting, filamentary clouds of deep purple and blue hydrogen gas. Over millions of years, gravity acts as an invisible hand, causing the densest parts of these cosmic webs to slowly spiral inward and collapse into tight, spinning knots. These knots heat up, a glowing from a dull red to a brilliant white at their cores. Suddenly, the first knot reaches a critical density and temperature, erupting in a blinding flash of fierce, blue-white light as nuclear fusion ignites. This first massive star, and then others across the canvas, blasts out powerful radiation that carves glowing, ionized bubbles into the surrounding dark gas, piercing the cosmic darkness for the first time.',
-    funFacts: [
-        "The first stars were true giants, potentially over 100 times more massive than our Sun.",
-        "These 'Population III' stars were made of almost pure hydrogen and helium, the only elements available in the early universe.",
-        "They burned for only a few million years (a cosmic eye-blink) before exploding as spectacular supernovae."
-    ]
-  },
-  { 
-    time: 1_000_000_000, 
-    name: 'Galaxy Formation', 
-    description: 'The immense gravity of dark matter halos, combined with the gravitational pull of star clusters, begins to draw in more gas and stars. These materials merge and collide, forming the earliest protogalaxies, the building blocks of the grand galaxies we see today.',
-    visualizationPrompt: 'The canvas now contains scattered clusters of brilliant blue first-generation stars and glowing nebulae, all interconnected by a faint, web-like scaffold of invisible dark matter. Pulled by gravity, these star clusters and vast clouds of gas begin to migrate along the dark matter filaments, streaming towards cosmic intersections. As they converge, they collide and merge in chaotic, gravitational dances, tearing streams of stars from one another while the combined mass begins to spin, flatten, and coalesce. This process transforms the scattered star groups into the first recognizable protogalaxies—bright, clumpy, irregular whirlpools of gas and stars with intensely active star-forming regions, establishing the foundational structures of the cosmos.',
-    funFacts: [
-        "Our own Milky Way is on a collision course with the Andromeda galaxy, set to merge in about 4.5 billion years.",
-        "Most of a galaxy's mass is invisible Dark Matter, which provides the gravitational 'scaffolding' for stars and gas.",
-        "At the heart of nearly every large galaxy, including ours, lies a supermassive black hole."
-    ]
-  },
-  { 
-    time: 9_000_000_000, 
-    name: 'Solar System Forms', 
-    description: 'Within a spiral arm of the burgeoning Milky Way galaxy, a giant molecular cloud collapses. At its center, our Sun is born. A swirling protoplanetary disk of leftover gas and dust around the young star gradually coalesces into the planets, moons, and asteroids of our Solar System.',
-    visualizationPrompt: 'The view zooms into a swirling arm of a mature galaxy, focusing on a vibrant, multi-colored interstellar cloud of gas and dust, enriched with heavy elements from long-dead stars. This nebula begins to slowly rotate and collapse under its own gravity, flattening into a vast, glowing protoplanetary disk. The center of the disk compresses and heats up, igniting into a stable, brilliant yellow star: our Sun. In the surrounding disk, tiny dust particles begin to stick together, forming larger bodies that sweep their orbits clean, carving distinct black gaps into the spinning, luminous disk. Through a series of violent collisions and mergers, these bodies grow into large, spherical planets, settling into stable orbits to create a familiar and orderly solar system.',
-    funFacts: [
-        "Our Sun accounts for 99.8% of all the mass in our entire solar system.",
-        "The asteroid belt between Mars and Jupiter is thought to be the rocky leftovers of a planet that failed to form due to Jupiter's immense gravity.",
-        "It takes light from the Sun about 8 minutes and 20 seconds to reach Earth."
-    ]
-  },
-  { 
-    time: 10_000_000_000, 
-    name: 'First Life on Earth', 
-    description: 'On the young, volatile Earth, in its primordial oceans or perhaps hydrothermal vents, simple organic molecules assemble into self-replicating structures. These single-celled organisms, the first life, begin a multi-billion-year evolutionary journey.',
-    visualizationPrompt: 'The camera zooms onto a molten, volcanic early Earth, a world of reddish rock and churning black oceans under a thick, hazy sky, constantly bombarded by asteroids. The view then dives beneath the turbulent ocean surface, descending to a deep-sea hydrothermal vent where plumes of chemical-rich, superheated water billow from the seafloor. In this energetic soup, simple organic molecules, visualized as small, glowing line segments, begin linking together into complex chains. These chains eventually enclose themselves within protective lipid bubbles, forming the first simple cells. These microscopic spheres, glowing with the faint light of nascent life, begin to multiply and cluster around the vents, representing the first spark of biology on a hostile, inorganic planet.',
-    funFacts: [
-        "For about 2 billion years, all life on Earth was microscopic.",
-        "Some scientists believe the essential building blocks of life were delivered to early Earth by asteroids or comets.",
-        "The oxygen in our atmosphere was produced by ancient photosynthetic bacteria over billions of years."
-    ]
-  },
-  { 
-    time: 13_800_000_000, 
-    name: 'Present Day', 
-    description: 'After 13.8 billion years of expansion and evolution, the universe is a vast cosmic web of galaxies, stars, and dark matter. On a small, rocky planet called Earth, humanity has emerged, capable of looking back and piecing together this grand cosmic story.',
-    visualizationPrompt: 'The visualization rapidly zooms out from a vibrant, modern Earth, a blue marble with green continents and sprawling city lights on its night side. The view pulls back past our Sun and the planets, through the majestic spiral arm of the Milky Way galaxy, revealing billions of other stars. The zoom accelerates dramatically, showing our galaxy to be just one of countless others. These galaxies are not scattered randomly but are arranged in a breathtaking, web-like structure of massive superclusters and filaments, separated by immense, dark voids. The final shot is this grand cosmic web, still slowly expanding, a testament to the 13.8 billion years of cosmic evolution from a single point of light to an intricate and living universe.',
-    funFacts: [
-        "There are more stars in the universe than grains of sand on all the beaches on Earth.",
-        "Because light takes time to travel, looking at distant galaxies is like looking back in time.",
-        "The universe is not only expanding, but the rate of expansion is accelerating due to a mysterious force called Dark Energy."
-    ]
-  },
-];
+import { useTranslations } from '../contexts/LanguageContext';
+import type { CosmicEvent } from '../i18n/translations';
 
 const MAX_TIME = 13_800_000_000;
 const LOG_MAX_TIME = Math.log10(MAX_TIME);
 
-// Calculates Y position on a logarithmic scale for a vertical timeline
+// Calculates Y position on a logarithmic scale
 function getEventY(time: number, height: number, padding: number): number {
   if (time <= 1) return padding;
   const logTime = Math.log10(time);
   return padding + (logTime / LOG_MAX_TIME) * (height - padding * 2);
 }
 
-// --- The React Component ---
+// Formats time into a readable string
+function formatTime(time: number, t: any): string {
+    if (time >= 1_000_000_000) {
+        return `${(time / 1_000_000_000).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 })} ${t.timeUnitBillion} ${t.timeUnitYears}`;
+    }
+    if (time >= 1_000_000) {
+        return `${(time / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 })} ${t.timeUnitMillion} ${t.timeUnitYears}`;
+    }
+    if (time >= 1_000) {
+        return `${(time / 1_000).toLocaleString()} ${t.timeUnitThousand} ${t.timeUnitYears}`;
+    }
+    return t.timeUnitYear1; // Special case for year 1
+}
 
 export const CosmicTimeline: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const visualizationSectionRef = useRef<HTMLDivElement | null>(null);
+  const { t } = useTranslations();
+  const events = t.events;
+
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const [selectedEvent, setSelectedEvent] = useState<CosmicEvent | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<CosmicEvent | null>(null);
   const eventPositions = useRef<Map<CosmicEvent, { x: number, y: number, radius: number }>>(new Map());
 
-  // State for AI visualization
   const [isGeneratingVis, setIsGeneratingVis] = useState(false);
   const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
   const [visualizationError, setVisualizationError] = useState<string | null>(null);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
 
-
-  // Effect for handling resize
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
-      if (entries && entries.length > 0) {
+      if (entries?.[0]) {
         const { width } = entries[0].contentRect;
-        // Height is calculated based on number of events for a vertical layout
-        const calculatedHeight = Math.max(events.length * 130, 800);
+        const calculatedHeight = Math.max(events.length * 140, 800);
         setDims({ width, height: calculatedHeight });
       }
     });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [events.length]);
 
-  // Effect for drawing the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || dims.width === 0) return;
@@ -148,94 +66,86 @@ export const CosmicTimeline: React.FC = () => {
     if (!ctx) return;
     
     const { width, height } = dims;
-    canvas.width = width * window.devicePixelRatio;
-    canvas.height = height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, width, height);
 
-    // --- Drawing constants based on canvas size ---
-    const padding = 50;
+    const padding = 60;
     const timelineX = width / 2;
     const baseUnit = width / 100;
-
-    // Enhanced proportional scaling for better legibility across screen sizes.
-    // Radii and font sizes now scale more dynamically with the canvas width.
     const eventRadius = Math.max(5, baseUnit * 0.8);
-    const stemLength = Math.min(width * 0.25, 150);
+    const stemLength = Math.min(width * 0.3, 200);
     const labelFontSize = Math.max(12, baseUnit * 1.6);
+    const yearFontSize = Math.max(10, baseUnit * 1.3);
 
-    // --- Draw Timeline Axis ---
     ctx.beginPath();
     ctx.moveTo(timelineX, padding);
     ctx.lineTo(timelineX, height - padding);
-    ctx.strokeStyle = '#475569'; // slate-600
+    ctx.strokeStyle = '#475569';
     ctx.lineWidth = 2;
     ctx.stroke();
     
-    // Gradient for markers
     const gradient = ctx.createLinearGradient(0, 0, width, 0);
-    gradient.addColorStop(0, '#67e8f9'); // cyan-300
-    gradient.addColorStop(0.5, '#a78bfa'); // violet-400
-    gradient.addColorStop(1, '#f472b6'); // pink-400
+    gradient.addColorStop(0, '#67e8f9');
+    gradient.addColorStop(0.5, '#a78bfa');
+    gradient.addColorStop(1, '#f472b6');
 
-    // --- Draw Events ---
     eventPositions.current.clear();
     events.forEach((event, i) => {
       const y = getEventY(event.time, height, padding);
-      
       const isLeft = i % 2 === 0;
       const x = timelineX + (isLeft ? -stemLength : stemLength);
       
       eventPositions.current.set(event, { x, y, radius: eventRadius });
 
-      // Stem
       ctx.beginPath();
       ctx.moveTo(timelineX, y);
       ctx.lineTo(x, y);
-      ctx.strokeStyle = '#475569'; // slate-600
+      ctx.strokeStyle = '#475569';
       ctx.stroke();
       
-      // Marker Circle
       ctx.beginPath();
       ctx.arc(x, y, eventRadius, 0, Math.PI * 2);
-      ctx.fillStyle = (selectedEvent === event || hoveredEvent === event) ? gradient : '#1e293b'; // slate-800
-      ctx.strokeStyle = (selectedEvent === event || hoveredEvent === event) ? '#a78bfa' : '#67e8f9'; // violet-400 or cyan-300
+      ctx.fillStyle = (selectedEvent === event || hoveredEvent === event) ? gradient : '#1e293b';
+      ctx.strokeStyle = (selectedEvent === event || hoveredEvent === event) ? '#a78bfa' : '#67e8f9';
       ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
 
-      // Label
-      ctx.fillStyle = '#cbd5e1'; // slate-300
-      ctx.font = `bold ${labelFontSize}px sans-serif`;
+      const textX = x + (isLeft ? -eventRadius - 12 : eventRadius + 12);
       ctx.textAlign = isLeft ? 'right' : 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(event.name, x + (isLeft ? -eventRadius - 10 : eventRadius + 10), y);
+      
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = `bold ${labelFontSize}px sans-serif`;
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(event.name, textX, y - 2);
+      
+      ctx.fillStyle = '#94a3b8'; // slate-400
+      ctx.font = `${yearFontSize}px sans-serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(formatTime(event.time, t), textX, y + 2);
     });
-  }, [dims, selectedEvent, hoveredEvent]);
+  }, [dims, selectedEvent, hoveredEvent, events, t]);
   
-  // Effect for cycling fun facts
   useEffect(() => {
-    if (isGeneratingVis && selectedEvent && selectedEvent.funFacts.length > 0) {
+    if (isGeneratingVis && selectedEvent?.funFacts.length) {
       const intervalId = setInterval(() => {
-        setCurrentFactIndex(prevIndex => (prevIndex + 1) % selectedEvent.funFacts.length);
-      }, 25000); // 25 seconds
-
-      return () => clearInterval(intervalId); // Cleanup
+        setCurrentFactIndex(prev => (prev + 1) % selectedEvent.funFacts.length);
+      }, 25000);
+      return () => clearInterval(intervalId);
     }
   }, [isGeneratingVis, selectedEvent]);
 
-  // Effect for scrolling back when visualization is ready
   useEffect(() => {
     if (visualizationCode) {
-      // A timeout ensures the iframe has rendered before we scroll
       setTimeout(() => {
         visualizationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
   }, [visualizationCode]);
 
-
-  // --- Interactivity Handlers ---
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -243,26 +153,21 @@ export const CosmicTimeline: React.FC = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    let foundEvent = null;
+    let foundEvent: CosmicEvent | null = null;
     for (const [event, pos] of eventPositions.current.entries()) {
-      const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-      if (distance < pos.radius + 10) { // Add padding for easier clicking
+      if (Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2) < pos.radius + 10) {
         foundEvent = event;
         break;
       }
     }
     
-    // If clicking the currently selected event, deselect it. Otherwise, select new one.
     const newSelectedEvent = selectedEvent === foundEvent ? null : foundEvent;
     setSelectedEvent(newSelectedEvent);
     
-    // Reset visualization if selection changes
     if (selectedEvent !== newSelectedEvent) {
         setVisualizationCode(null);
         setVisualizationError(null);
-        // Scroll to the visualization section if a new event is selected
         if (newSelectedEvent) {
-             // A timeout gives the DOM time to render the section before scrolling
             setTimeout(() => {
                 visualizationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
@@ -271,19 +176,18 @@ export const CosmicTimeline: React.FC = () => {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-     const canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    let foundEvent = null;
+    let foundEvent: CosmicEvent | null = null;
     for (const [event, pos] of eventPositions.current.entries()) {
-      const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-      if (distance < pos.radius + 10) {
-        foundEvent = event;
-        break;
-      }
+        if (Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2) < pos.radius + 10) {
+            foundEvent = event;
+            break;
+        }
     }
     setHoveredEvent(foundEvent);
     canvas.style.cursor = foundEvent ? 'pointer' : 'default';
@@ -295,34 +199,33 @@ export const CosmicTimeline: React.FC = () => {
     setIsGeneratingVis(true);
     setVisualizationCode(null);
     setVisualizationError(null);
-    setCurrentFactIndex(0); // Reset fact index on new generation
+    setCurrentFactIndex(0);
     try {
       const code = await generateVisualizationCode(selectedEvent);
       setVisualizationCode(code);
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+      const errorMessage = e instanceof Error ? e.message : t.errorUnknownErrorMessage;
       if (errorMessage.toLowerCase().includes('api key not valid')) {
-        setVisualizationError('Your Gemini API key appears to be invalid or has expired. Please check your credentials.');
+        setVisualizationError(t.errorAuthErrorMessage);
       } else {
-        setVisualizationError(`The AI failed to generate the visualization. Error: ${errorMessage}`);
+        setVisualizationError(`${t.errorGenerationFailed} ${errorMessage}`);
       }
     } finally {
       setIsGeneratingVis(false);
     }
-  }, [selectedEvent]);
+  }, [selectedEvent, t]);
 
   const handleScrollToChat = () => {
     document.getElementById('astrochat-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-
   return (
     <section className="text-center w-full" ref={containerRef}>
       <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
-        A Journey Through Cosmic Time
+        {t.timelineTitle}
       </h2>
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
-        Explore 13.8 billion years of history. Click on an event to learn more and generate a unique AI visualization.
+        {t.timelineSubtitle}
       </p>
       <div className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden">
         <canvas 
@@ -331,12 +234,11 @@ export const CosmicTimeline: React.FC = () => {
           onClick={handleCanvasClick}
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => setHoveredEvent(null)}
-          aria-label="Interactive vertical cosmic timeline"
+          aria-label={t.timelineAriaLabel}
           role="graphics-document"
         />
       </div>
 
-      {/* --- AI Visualization Section --- */}
       {selectedEvent && (
         <div className="mt-8 text-center animate-fade-in" ref={visualizationSectionRef}>
           <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 max-w-3xl mx-auto">
@@ -350,7 +252,7 @@ export const CosmicTimeline: React.FC = () => {
                 className="group mt-6 inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-cyan-500 to-purple-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500"
               >
                 <SparklesIcon />
-                <span className="text-md font-semibold">Generate Visualization</span>
+                <span className="text-md font-semibold">{t.buttonGenerateVis}</span>
               </button>
              )}
           </div>
@@ -358,8 +260,8 @@ export const CosmicTimeline: React.FC = () => {
           {isGeneratingVis && (
              <div className="mt-6 flex flex-col items-center gap-4 text-cyan-300 max-w-2xl mx-auto">
                 <LoadingIndicator />
-                <p className="font-semibold text-lg">Asking the AI to visualize "{selectedEvent.name}"...</p>
-                <p className="text-slate-400">This can take a moment. While you wait, here's a fun fact:</p>
+                <p className="font-semibold text-lg">{t.visLoadingMessage.replace('{eventName}', selectedEvent.name)}</p>
+                <p className="text-slate-400">{t.visFunFactMessage}</p>
                 
                 <div key={currentFactIndex} className="p-4 bg-slate-800/60 border border-slate-700 rounded-lg animate-fade-in text-center min-h-[80px] flex items-center justify-center">
                     <p className="italic text-slate-300">"{selectedEvent.funFacts[currentFactIndex]}"</p>
@@ -369,27 +271,27 @@ export const CosmicTimeline: React.FC = () => {
                     onClick={handleScrollToChat}
                     className="mt-4 px-5 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500"
                 >
-                    Ask AstroChat while you wait
+                    {t.buttonAskWhileWaiting}
                 </button>
              </div>
           )}
 
           {visualizationError && (
              <div className="mt-6 text-center text-red-400 p-4 bg-red-900/50 border border-red-700 rounded-lg max-w-3xl mx-auto">
-                <h3 className="text-lg font-bold mb-2">Generation Failed</h3>
+                <h3 className="text-lg font-bold mb-2">{t.errorGenerationFailedTitle}</h3>
                 <p>{visualizationError}</p>
             </div>
           )}
 
           {visualizationCode && (
             <div className="mt-8 animate-fade-in">
-                <h3 className="text-2xl font-bold text-cyan-300 mb-4">AI Visualization: {selectedEvent.name}</h3>
+                <h3 className="text-2xl font-bold text-cyan-300 mb-4">{t.visResultTitle} {selectedEvent.name}</h3>
                 <div className="w-full min-h-[50vh] max-h-[70vh] aspect-video bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden flex items-center justify-center mx-auto">
                     <iframe
                         srcDoc={visualizationCode}
-                        title={`AI Generated Visualization for ${selectedEvent.name}`}
+                        title={`${t.visResultTitle} ${selectedEvent.name}`}
                         className="w-full h-full rounded-lg border-0"
-                        sandbox="allow-scripts" // Security: restrict iframe capabilities but allow scripts to run
+                        sandbox="allow-scripts"
                     />
                 </div>
             </div>

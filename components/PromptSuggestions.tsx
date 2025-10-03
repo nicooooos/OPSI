@@ -1,17 +1,15 @@
+
 import React from 'react';
+import { useTranslations } from '../contexts/LanguageContext';
 
 interface PromptSuggestionsProps {
   onPromptClick: (prompt: string) => void;
 }
 
-const suggestions = [
-  "What is a black hole?",
-  "Tell me about the James Webb Telescope.",
-  "How are stars born?",
-  "Explain dark matter in simple terms.",
-];
-
 export const PromptSuggestions: React.FC<PromptSuggestionsProps> = ({ onPromptClick }) => {
+  const { t } = useTranslations();
+  const suggestions = t.promptSuggestions;
+
   return (
     <div className="w-full max-w-xl lg:max-w-3xl mx-auto p-4 animate-fade-in mt-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

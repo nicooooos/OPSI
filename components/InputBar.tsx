@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { SendIcon } from './Icons';
+import { useTranslations } from '../contexts/LanguageContext';
 
 interface InputBarProps {
   onSendMessage: (text: string) => void;
@@ -9,6 +10,7 @@ interface InputBarProps {
 
 export const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
   const [text, setText] = useState('');
+  const { t } = useTranslations();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) 
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Ask about stars, planets, galaxies..."
+        placeholder={t.inputPlaceholder}
         className="flex-1 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-300"
         disabled={isLoading}
       />
