@@ -30,6 +30,12 @@ function formatTime(time: number, t: any): string {
     return t.timeUnitYear1; // Special case for year 1
 }
 
+interface EventPosition {
+  x: number;
+  y: number;
+  radius: number;
+}
+
 export const CosmicTimeline: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +46,7 @@ export const CosmicTimeline: React.FC = () => {
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const [selectedEvent, setSelectedEvent] = useState<CosmicEvent | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<CosmicEvent | null>(null);
-  const eventPositions = useRef<Map<CosmicEvent, { x: number, y: number, radius: number }>>(new Map());
+  const eventPositions = useRef<Map<CosmicEvent, EventPosition>>(new Map());
 
   const [isGeneratingVis, setIsGeneratingVis] = useState(false);
   const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
@@ -51,7 +57,8 @@ export const CosmicTimeline: React.FC = () => {
     const resizeObserver = new ResizeObserver(entries => {
       if (entries?.[0]) {
         const { width } = entries[0].contentRect;
-        const calculatedHeight = Math.max(events.length * 140, 800);
+        // Increased height to give more room for collision avoidance
+        const calculatedHeight = Math.max(events.length * 160, 950);
         setDims({ width, height: calculatedHeight });
       }
     });
@@ -79,10 +86,38 @@ export const CosmicTimeline: React.FC = () => {
     const stemLength = Math.min(width * 0.3, 200);
     const labelFontSize = Math.max(12, baseUnit * 1.6);
     const yearFontSize = Math.max(10, baseUnit * 1.3);
+    const minVerticalSeparation = labelFontSize + yearFontSize + 15;
 
+    // --- Pass 1: Calculate initial positions and correct for overlaps ---
+    const drawData = events.map((event, i) => {
+        const y = getEventY(event.time, height, padding);
+        const isLeft = i % 2 === 0;
+        const x = timelineX + (isLeft ? -stemLength : stemLength);
+        return { event, x, y, isLeft };
+    });
+
+    const leftEvents = drawData.filter(d => d.isLeft);
+    const rightEvents = drawData.filter(d => d.isLeft === false);
+
+    // Correct overlaps on each side separately
+    [leftEvents, rightEvents].forEach(sideEvents => {
+        for (let i = 1; i < sideEvents.length; i++) {
+            const prevEvent = sideEvents[i - 1];
+            const currentEvent = sideEvents[i];
+            const requiredY = prevEvent.y + minVerticalSeparation;
+            if (currentEvent.y < requiredY) {
+                currentEvent.y = requiredY;
+            }
+        }
+    });
+    
+    // Find the last event's Y position to draw the timeline correctly
+    const lastEventY = Math.max(...drawData.map(d => d.y));
+
+    // --- Pass 2: Draw everything using corrected positions ---
     ctx.beginPath();
     ctx.moveTo(timelineX, padding);
-    ctx.lineTo(timelineX, height - padding);
+    ctx.lineTo(timelineX, lastEventY + eventRadius + padding/2);
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -93,19 +128,17 @@ export const CosmicTimeline: React.FC = () => {
     gradient.addColorStop(1, '#f472b6');
 
     eventPositions.current.clear();
-    events.forEach((event, i) => {
-      const y = getEventY(event.time, height, padding);
-      const isLeft = i % 2 === 0;
-      const x = timelineX + (isLeft ? -stemLength : stemLength);
-      
+    drawData.forEach(({ event, x, y, isLeft }) => {
       eventPositions.current.set(event, { x, y, radius: eventRadius });
 
+      // Draw stem
       ctx.beginPath();
       ctx.moveTo(timelineX, y);
       ctx.lineTo(x, y);
       ctx.strokeStyle = '#475569';
       ctx.stroke();
       
+      // Draw event circle
       ctx.beginPath();
       ctx.arc(x, y, eventRadius, 0, Math.PI * 2);
       ctx.fillStyle = (selectedEvent === event || hoveredEvent === event) ? gradient : '#1e293b';
@@ -114,6 +147,7 @@ export const CosmicTimeline: React.FC = () => {
       ctx.fill();
       ctx.stroke();
 
+      // Draw text
       const textX = x + (isLeft ? -eventRadius - 12 : eventRadius + 12);
       ctx.textAlign = isLeft ? 'right' : 'left';
       
@@ -221,6 +255,9 @@ export const CosmicTimeline: React.FC = () => {
 
   return (
     <section className="text-center w-full" ref={containerRef}>
+      <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-100 mb-4">
+        Time Traveller
+      </h1>
       <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
         {t.timelineTitle}
       </h2>
