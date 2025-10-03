@@ -92,8 +92,17 @@ export const CosmicTimeline: React.FC = () => {
     // --- Drawing constants based on canvas size ---
     const padding = width * 0.05;
     const timelineY = height / 2;
-    const eventRadius = Math.max(5, width * 0.007);
+    
+    // Define a base unit for proportional scaling
+    const baseUnit = width / 100;
+
+    const eventRadius = Math.max(5, baseUnit * 0.8);
     const baseStemHeight = height * 0.1;
+    const labelFontSize = Math.max(12, baseUnit * 1.3);
+    const titleFontSize = Math.max(16, baseUnit * 1.6);
+    const descFontSize = Math.max(13, baseUnit * 1.3);
+    const descLineHeight = Math.max(18, baseUnit * 2.0);
+
 
     // --- Draw Timeline Axis ---
     ctx.beginPath();
@@ -141,7 +150,7 @@ export const CosmicTimeline: React.FC = () => {
 
       // Label
       ctx.fillStyle = '#cbd5e1'; // slate-300
-      ctx.font = `bold ${Math.max(12, width * 0.012)}px sans-serif`;
+      ctx.font = `bold ${labelFontSize}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = (isTop) ? 'bottom' : 'top';
       ctx.fillText(event.name, x, y + (isTop ? -eventRadius - 5 : eventRadius + 5));
@@ -165,16 +174,15 @@ export const CosmicTimeline: React.FC = () => {
       
       // Title
       ctx.fillStyle = gradient;
-      ctx.font = `bold ${Math.max(16, width * 0.015)}px sans-serif`;
+      ctx.font = `bold ${titleFontSize}px sans-serif`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillText(selectedEvent.name, boxX + textPadding, boxY + textPadding);
 
       // Description
       ctx.fillStyle = '#cbd5e1'; // slate-300
-      ctx.font = `${Math.max(13, width * 0.012)}px sans-serif`;
-      const lineHeight = Math.max(18, width * 0.018);
-      wrapText(ctx, selectedEvent.description, boxX + textPadding, boxY + textPadding + 30, boxWidth - textPadding * 2, lineHeight);
+      ctx.font = `${descFontSize}px sans-serif`;
+      wrapText(ctx, selectedEvent.description, boxX + textPadding, boxY + textPadding + titleFontSize + 5, boxWidth - textPadding * 2, descLineHeight);
     }
 
   }, [dims, selectedEvent, hoveredEvent]);

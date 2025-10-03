@@ -37,76 +37,20 @@ export const createChatSession = (level: EducationLevel): Chat => {
   return chat;
 };
 
-export const createImagePrompt = async (text: string): Promise<string> => {
-    const systemInstruction = `You are an AI assistant that creates concise, descriptive, and visually rich prompts for an image generation model. Based on the following text about astronomy, create a single, clear, artistic prompt that captures the main subject and atmosphere. The prompt should be a single sentence or a short phrase, focusing on visual elements. Example style: "A breathtaking nebula with swirling clouds of pink and blue gas, newborn stars twinkling within, hyperrealistic, 8k". Do not add any extra text or explanations.`;
-    
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Create an image prompt from this text: "${text}"`,
-        config: {
-            systemInstruction,
-        }
-    });
-
-    return response.text.trim();
-};
-
-
-export const generateImage = async (prompt: string): Promise<string> => {
-    const response = await ai.models.generateImages({
-        model: 'imagen-4.0-generate-001',
-        prompt: `Astronomy, cinematic, epic, beautiful, high resolution. ${prompt}`,
-        config: {
-          numberOfImages: 1,
-          outputMimeType: 'image/jpeg',
-          aspectRatio: '16:9',
-        },
-    });
-
-    if (!response.generatedImages || response.generatedImages.length === 0) {
-        throw new Error("Image generation failed or returned no images.");
-    }
-    
-    return response.generatedImages[0].image.imageBytes;
-};
-
-export const generateCosmicEvolutionVideo = async (prompt: string): Promise<string> => {
-  let operation = await ai.models.generateVideos({
-    model: 'veo-2.0-generate-001',
-    prompt: prompt,
-    config: {
-      numberOfVideos: 1,
-    }
-  });
-
-  // Poll for completion
-  while (!operation.done) {
-    await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
-    operation = await ai.operations.getVideosOperation({ operation: operation });
-  }
-  
-  if (operation.error) {
-    throw new Error(`Video generation failed: ${operation.error.message}`);
-  }
-
-  const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-  
-  if (!downloadLink) {
-    throw new Error("Video generation completed, but no video URI was found in the response. The operation may have failed silently.");
-  }
-  
-  // The component will fetch this URI with the API key appended
-  return `${downloadLink}&key=${API_KEY}`;
-};
-
 export const generateVisualizationCode = async (): Promise<string> => {
-    const systemInstruction = `You are an expert web developer specializing in creative and scientific visualizations. Your task is to generate a single, self-contained HTML file with embedded CSS and JavaScript. This file should create a visually engaging, animated representation of the Big Bang and the early universe expansion.
+    const systemInstruction = `You are an expert web developer specializing in creative and scientific visualizations. Your task is to generate a single, self-contained HTML file with embedded CSS and JavaScript. This file should create a visually engaging, animated representation of the cosmic evolution from the Big Bang to the present day.
+
+- The visualization must be a **linear, non-looping animation** that progresses through distinct phases.
+- The animation should start automatically on load and have a clear beginning and end.
+- Sequence of events to visualize:
+    1.  **The Big Bang:** Start with an intensely bright, singular point that rapidly expands (Inflation).
+    2.  **The Dark Ages & First Stars:** Transition to a dark space with cooling particles, eventually leading to the ignition of the first, brilliant, massive stars.
+    3.  **Galaxy Formation:** Show these stars clustering together, forming early galaxies that swirl and merge.
+    4.  **Present Day:** Conclude with a view of a mature, complex galaxy like the Milky Way, with diverse stars and planetary systems, which then remains as a static final scene.
 - The visualization must be responsive and fill its container. Use a dark, cosmic theme.
-- The animation should start automatically on load and loop.
 - DO NOT use any external libraries (like p5.js, three.js), images, or fonts. All assets must be generated with vanilla JS/CSS/HTML (e.g., canvas, svg, css animations).
 - The code must be a complete HTML document, starting with \`<!DOCTYPE html>\` and ending with \`</html>\`.
-- Ensure the animation is performant and lightweight.
-- Example concept: An initial flash from the center, followed by particles expanding outwards, changing color as they "cool", and eventually forming complex structures or galaxies in a simplified way.`;
+- Ensure the animation is performant and lightweight.`;
     
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',

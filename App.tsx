@@ -5,11 +5,10 @@ import { ChatWindow } from './components/ChatWindow';
 import { InputBar } from './components/InputBar';
 import { Header } from './components/Header';
 import { StarryBackground } from './components/StarryBackground';
-import { createChatSession, createImagePrompt, generateImage } from './services/geminiService';
+import { createChatSession } from './services/geminiService';
 import type { ChatMessage, EducationLevel } from './types';
 import { MessageRole } from './types';
 import { EducationLevelSelector } from './components/EducationLevelSelector';
-import { VisualizationModal } from './components/VisualizationModal';
 import { CosmicTimeline } from './components/CosmicTimeline';
 import { CloseIcon, WarningIcon } from './components/Icons';
 import { PromptSuggestions } from './components/PromptSuggestions';
@@ -61,12 +60,6 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<AppError | null>(null);
   const [educationLevel, setEducationLevel] = useState<EducationLevel | null>(null);
-
-  // State for Visualization Modal
-  const [isVizModalOpen, setIsVizModalOpen] = useState<boolean>(false);
-  const [vizImageUrl, setVizImageUrl] = useState<string | null>(null);
-  const [isVizLoading, setIsVizLoading] = useState<boolean>(false);
-  const [vizError, setVizError] = useState<string | null>(null);
 
   const handleDismissError = useCallback(() => {
     setError(null);
@@ -163,32 +156,6 @@ const App: React.FC = () => {
     }
   }, [chat, isLoading]);
 
-  const handleGenerateVisualization = useCallback(async (content: string) => {
-    setIsVizLoading(true);
-    setVizError(null);
-    setVizImageUrl(null);
-    try {
-      const prompt = await createImagePrompt(content);
-      const imageData = await generateImage(prompt);
-      setVizImageUrl(`data:image/png;base64,${imageData}`);
-    } catch (e) {
-      setVizError(e instanceof Error ? e.message : 'Failed to generate image.');
-    } finally {
-      setIsVizLoading(false);
-    }
-  }, []);
-
-  const handleOpenVizModal = useCallback((content: string) => {
-    setIsVizModalOpen(true);
-    handleGenerateVisualization(content);
-  }, [handleGenerateVisualization]);
-
-  const handleCloseVizModal = useCallback(() => {
-    setIsVizModalOpen(false);
-    setVizImageUrl(null);
-    setVizError(null);
-  }, []);
-
   return (
     <div className="relative flex flex-col min-h-screen w-screen overflow-x-hidden antialiased bg-slate-900 text-white">
       <StarryBackground />
@@ -208,7 +175,7 @@ const App: React.FC = () => {
             <>
               <Header onBack={handleBack} />
               <main className="flex-1 flex flex-col p-4 overflow-y-auto">
-                <ChatWindow messages={messages} isLoading={isLoading} onVisualize={handleOpenVizModal} />
+                <ChatWindow messages={messages} isLoading={isLoading} />
                 {messages.length === 1 && !isLoading && (
                   <PromptSuggestions onPromptClick={handleSendMessage} />
                 )}
@@ -220,14 +187,6 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
-
-      <VisualizationModal
-        isOpen={isVizModalOpen}
-        isLoading={isVizLoading}
-        imageUrl={vizImageUrl}
-        error={vizError}
-        onClose={handleCloseVizModal}
-      />
     </div>
   );
 };
