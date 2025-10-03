@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
 import { SparklesIcon } from './Icons';
@@ -13,13 +12,13 @@ export interface CosmicEvent {
 }
 
 const events: CosmicEvent[] = [
-  { time: 1, name: 'The Big Bang', description: 'The universe begins from an infinitely hot, dense point and undergoes rapid inflation, creating spacetime.' },
-  { time: 380_000, name: 'Recombination', description: 'The universe cools enough for protons and electrons to form neutral hydrogen atoms, making the cosmos transparent to light for the first time.' },
-  { time: 400_000_000, name: 'First Stars Ignite', description: 'Gravity collapses clouds of hydrogen and helium gas, igniting the first generation of massive, brilliant stars, ending the Cosmic Dark Ages.' },
-  { time: 1_000_000_000, name: 'Galaxy Formation', description: 'Early stars and gas clouds merge under gravity, forming the first protogalaxies. These structures continue to collide and grow over billions of years.' },
-  { time: 9_000_000_000, name: 'Solar System Forms', description: 'Within a spiral arm of the Milky Way, a cloud of gas and dust collapses to form our Sun. A surrounding disk of material coalesces into planets, including Earth.' },
-  { time: 10_000_000_000, name: 'First Life on Earth', description: 'Simple, single-celled organisms emerge in Earth\'s primordial oceans, marking the beginning of biology.' },
-  { time: 13_800_000_000, name: 'Present Day', description: 'After 13.8 billion years of cosmic evolution, the universe is filled with complex structures, galaxies, stars, planets, and at least one world teeming with life.' },
+  { time: 1, name: 'The Big Bang', description: 'The universe erupts from a singularity of infinite density. A period of exponential \'inflation\' occurs, expanding spacetime faster than light and laying the foundation for all future structures.' },
+  { time: 380_000, name: 'Recombination', description: 'Roughly 380,000 years later, the universe cools sufficiently for electrons and protons to combine into the first neutral atoms (mostly hydrogen). This allows photons to travel freely for the first time, creating the Cosmic Microwave Background radiation we can still detect today.' },
+  { time: 400_000_000, name: 'First Stars Ignite', description: 'Gravity pulls vast clouds of primordial gas together until they collapse, triggering nuclear fusion in their cores. This ignites the very first stars, which are massive, incredibly bright, and short-lived, ending the Cosmic Dark Ages.' },
+  { time: 1_000_000_000, name: 'Galaxy Formation', description: 'The immense gravity of dark matter halos, combined with the gravitational pull of star clusters, begins to draw in more gas and stars. These materials merge and collide, forming the earliest protogalaxies, the building blocks of the grand galaxies we see today.' },
+  { time: 9_000_000_000, name: 'Solar System Forms', description: 'Within a spiral arm of the burgeoning Milky Way galaxy, a giant molecular cloud collapses. At its center, our Sun is born. A swirling protoplanetary disk of leftover gas and dust around the young star gradually coalesces into the planets, moons, and asteroids of our Solar System.' },
+  { time: 10_000_000_000, name: 'First Life on Earth', description: 'On the young, volatile Earth, in its primordial oceans or perhaps hydrothermal vents, simple organic molecules assemble into self-replicating structures. These single-celled organisms, the first life, begin a multi-billion-year evolutionary journey.' },
+  { time: 13_800_000_000, name: 'Present Day', description: 'After 13.8 billion years of expansion and evolution, the universe is a vast cosmic web of galaxies, stars, and dark matter. On a small, rocky planet called Earth, humanity has emerged, capable of looking back and piecing together this grand cosmic story.' },
 ];
 
 const MAX_TIME = 13_800_000_000;
@@ -37,6 +36,7 @@ function getEventY(time: number, height: number, padding: number): number {
 export const CosmicTimeline: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const visualizationSectionRef = useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const [selectedEvent, setSelectedEvent] = useState<CosmicEvent | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<CosmicEvent | null>(null);
@@ -84,9 +84,11 @@ export const CosmicTimeline: React.FC = () => {
     const timelineX = width / 2;
     const baseUnit = width / 100;
 
-    const eventRadius = Math.max(6, baseUnit * 1.0);
+    // Enhanced proportional scaling for better legibility across screen sizes.
+    // Radii and font sizes now scale more dynamically with the canvas width.
+    const eventRadius = Math.max(5, baseUnit * 0.8);
     const stemLength = Math.min(width * 0.25, 150);
-    const labelFontSize = Math.max(14, baseUnit * 1.5);
+    const labelFontSize = Math.max(12, baseUnit * 1.6);
 
     // --- Draw Timeline Axis ---
     ctx.beginPath();
@@ -162,6 +164,13 @@ export const CosmicTimeline: React.FC = () => {
     if (selectedEvent !== newSelectedEvent) {
         setVisualizationCode(null);
         setVisualizationError(null);
+        // Scroll to the visualization section if a new event is selected
+        if (newSelectedEvent) {
+             // A timeout gives the DOM time to render the section before scrolling
+            setTimeout(() => {
+                visualizationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
     }
   };
 
@@ -228,7 +237,7 @@ export const CosmicTimeline: React.FC = () => {
 
       {/* --- AI Visualization Section --- */}
       {selectedEvent && (
-        <div className="mt-8 text-center animate-fade-in">
+        <div className="mt-8 text-center animate-fade-in" ref={visualizationSectionRef}>
           <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 max-w-3xl mx-auto">
              <h3 className="text-2xl font-bold text-cyan-300">{selectedEvent.name}</h3>
              <p className="text-slate-300 mt-2">{selectedEvent.description}</p>
