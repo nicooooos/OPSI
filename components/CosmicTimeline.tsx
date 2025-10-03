@@ -93,7 +93,7 @@ export const CosmicTimeline: React.FC = () => {
     const padding = width * 0.05;
     const timelineY = height / 2;
     const eventRadius = Math.max(5, width * 0.007);
-    const stemHeight = height * 0.1;
+    const baseStemHeight = height * 0.1;
 
     // --- Draw Timeline Axis ---
     ctx.beginPath();
@@ -113,7 +113,13 @@ export const CosmicTimeline: React.FC = () => {
     eventPositions.current.clear();
     events.forEach((event, i) => {
       const x = getEventX(event.time, width, padding);
-      const y = timelineY + (i % 2 === 0 ? -stemHeight : stemHeight);
+      
+      // Stagger stem heights to prevent label overlap
+      const isTop = i % 2 === 0;
+      // Stagger pairs of events: (0,1) are short, (2,3) are long, (4,5) are short, etc.
+      const isLongStem = Math.floor(i / 2) % 2 !== 0; 
+      const currentStemHeight = isLongStem ? baseStemHeight * 1.6 : baseStemHeight;
+      const y = timelineY + (isTop ? -currentStemHeight : currentStemHeight);
       
       eventPositions.current.set(event, { x, y, radius: eventRadius });
 
@@ -137,8 +143,8 @@ export const CosmicTimeline: React.FC = () => {
       ctx.fillStyle = '#cbd5e1'; // slate-300
       ctx.font = `bold ${Math.max(12, width * 0.012)}px sans-serif`;
       ctx.textAlign = 'center';
-      ctx.textBaseline = (i % 2 === 0) ? 'bottom' : 'top';
-      ctx.fillText(event.name, x, y + (i % 2 === 0 ? -eventRadius - 5 : eventRadius + 5));
+      ctx.textBaseline = (isTop) ? 'bottom' : 'top';
+      ctx.fillText(event.name, x, y + (isTop ? -eventRadius - 5 : eventRadius + 5));
     });
 
     // --- Draw Selected Event Info Box ---
@@ -191,7 +197,8 @@ export const CosmicTimeline: React.FC = () => {
     }
     
     if (isClick) {
-      setSelectedEvent(foundEvent);
+      // If clicking the currently selected event, deselect it. Otherwise, select the new one.
+      setSelectedEvent(prev => (prev === foundEvent ? null : foundEvent));
     } else {
       setHoveredEvent(foundEvent);
       canvas.style.cursor = foundEvent ? 'pointer' : 'default';
@@ -201,9 +208,9 @@ export const CosmicTimeline: React.FC = () => {
 
   return (
     <section className="text-center w-full" ref={containerRef}>
-      <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
+      <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
         A Journey Through Cosmic Time
-      </h1>
+      </h2>
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
         Explore 13.8 billion years of history, from the first moments of the universe to today. Click on an event to learn more.
       </p>

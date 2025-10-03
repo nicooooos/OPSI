@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { EducationLevel } from '../types';
 
@@ -96,4 +97,34 @@ export const generateCosmicEvolutionVideo = async (prompt: string): Promise<stri
   
   // The component will fetch this URI with the API key appended
   return `${downloadLink}&key=${API_KEY}`;
+};
+
+export const generateVisualizationCode = async (): Promise<string> => {
+    const systemInstruction = `You are an expert web developer specializing in creative and scientific visualizations. Your task is to generate a single, self-contained HTML file with embedded CSS and JavaScript. This file should create a visually engaging, animated representation of the Big Bang and the early universe expansion.
+- The visualization must be responsive and fill its container. Use a dark, cosmic theme.
+- The animation should start automatically on load and loop.
+- DO NOT use any external libraries (like p5.js, three.js), images, or fonts. All assets must be generated with vanilla JS/CSS/HTML (e.g., canvas, svg, css animations).
+- The code must be a complete HTML document, starting with \`<!DOCTYPE html>\` and ending with \`</html>\`.
+- Ensure the animation is performant and lightweight.
+- Example concept: An initial flash from the center, followed by particles expanding outwards, changing color as they "cool", and eventually forming complex structures or galaxies in a simplified way.`;
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: 'Generate the Big Bang visualization code now.',
+        config: {
+            systemInstruction,
+            temperature: 0.7,
+        }
+    });
+
+    // Clean up response, remove markdown fences if they exist
+    let code = response.text.trim();
+    if (code.startsWith('```html')) {
+        code = code.substring(7, code.length - 3).trim();
+    } else if (code.startsWith('```')) {
+         code = code.substring(3, code.length - 3).trim();
+    }
+
+
+    return code;
 };
