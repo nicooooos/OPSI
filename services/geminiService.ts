@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { EducationLevel } from '../types';
 import type { CosmicEvent } from "../components/CosmicTimeline";
@@ -48,9 +47,10 @@ export const generateVisualizationCode = async (event: CosmicEvent): Promise<str
 - Ensure the animation is performant and lightweight.
 - The animation should be directly related to the event title and description.`;
     
-    const userPrompt = `Generate a visualization for the following event:
-- Title: "${event.name}"
-- Description: "${event.description}"`;
+    const userPrompt = `Generate a visualization for the event titled "${event.name}".
+
+Here are the detailed instructions for the animation:
+${event.visualizationPrompt}`;
 
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
