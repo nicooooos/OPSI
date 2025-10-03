@@ -166,7 +166,7 @@ const App: React.FC = () => {
         <div className="border-t-2 border-dashed border-slate-700/50" aria-hidden="true"></div>
         
         {/* AstroChat AI Section Wrapper */}
-        <div className="min-h-[80vh] flex flex-col bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+        <div id="astrochat-section" className="min-h-[80vh] flex flex-col bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
           {!educationLevel ? (
             <EducationLevelSelector onSelectLevel={handleSelectLevel} />
           ) : (
