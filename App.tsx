@@ -10,7 +10,7 @@ import type { ChatMessage, EducationLevel } from './types';
 import { MessageRole } from './types';
 import { EducationLevelSelector } from './components/EducationLevelSelector';
 import { VisualizationModal } from './components/VisualizationModal';
-import { BigBangVisualizer } from './components/BigBangVisualizer';
+import { CosmicTimeline } from './components/CosmicTimeline';
 import { CloseIcon, WarningIcon } from './components/Icons';
 import { PromptSuggestions } from './components/PromptSuggestions';
 
@@ -194,7 +194,7 @@ const App: React.FC = () => {
       <ErrorDisplay error={error} onClose={handleDismissError} />
       
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24 z-10 flex flex-col gap-12">
-        <BigBangVisualizer />
+        <CosmicTimeline />
 
         <div className="border-t-2 border-dashed border-slate-700/50" aria-hidden="true"></div>
         
