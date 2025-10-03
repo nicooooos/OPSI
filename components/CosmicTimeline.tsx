@@ -1,8 +1,12 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { generateVisualizationCode } from '../services/geminiService';
+import { SparklesIcon } from './Icons';
+import { LoadingIndicator } from './LoadingIndicator';
+
 
 // --- Data for the Timeline ---
-interface CosmicEvent {
+export interface CosmicEvent {
   time: number; // Years after Big Bang
   name: string;
   description: string;
@@ -21,32 +25,11 @@ const events: CosmicEvent[] = [
 const MAX_TIME = 13_800_000_000;
 const LOG_MAX_TIME = Math.log10(MAX_TIME);
 
-// --- Helper Functions for Canvas Drawing ---
-
-// Wraps text to fit within a specified width on the canvas
-function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
-  const words = text.split(' ');
-  let line = '';
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = context.measureText(testLine);
-    const testWidth = metrics.width;
-    if (testWidth > maxWidth && n > 0) {
-      context.fillText(line, x, y);
-      line = words[n] + ' ';
-      y += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  context.fillText(line, x, y);
-}
-
-// Calculates X position on a logarithmic scale
-function getEventX(time: number, width: number, padding: number): number {
+// Calculates Y position on a logarithmic scale for a vertical timeline
+function getEventY(time: number, height: number, padding: number): number {
   if (time <= 1) return padding;
   const logTime = Math.log10(time);
-  return padding + (logTime / LOG_MAX_TIME) * (width - padding * 2);
+  return padding + (logTime / LOG_MAX_TIME) * (height - padding * 2);
 }
 
 // --- The React Component ---
@@ -59,13 +42,20 @@ export const CosmicTimeline: React.FC = () => {
   const [hoveredEvent, setHoveredEvent] = useState<CosmicEvent | null>(null);
   const eventPositions = useRef<Map<CosmicEvent, { x: number, y: number, radius: number }>>(new Map());
 
+  // State for AI visualization
+  const [isGeneratingVis, setIsGeneratingVis] = useState(false);
+  const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
+  const [visualizationError, setVisualizationError] = useState<string | null>(null);
+
+
   // Effect for handling resize
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
       if (entries && entries.length > 0) {
         const { width } = entries[0].contentRect;
-        // A fixed aspect ratio for the canvas content
-        setDims({ width, height: Math.min(width * 0.4, 450) });
+        // Height is calculated based on number of events for a vertical layout
+        const calculatedHeight = Math.max(events.length * 130, 800);
+        setDims({ width, height: calculatedHeight });
       }
     });
 
@@ -79,7 +69,7 @@ export const CosmicTimeline: React.FC = () => {
   // Effect for drawing the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || dims.width === 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
@@ -90,24 +80,18 @@ export const CosmicTimeline: React.FC = () => {
     ctx.clearRect(0, 0, width, height);
 
     // --- Drawing constants based on canvas size ---
-    const padding = width * 0.05;
-    const timelineY = height / 2;
-    
-    // Define a base unit for proportional scaling
+    const padding = 50;
+    const timelineX = width / 2;
     const baseUnit = width / 100;
 
-    const eventRadius = Math.max(5, baseUnit * 0.8);
-    const baseStemHeight = height * 0.1;
-    const labelFontSize = Math.max(12, baseUnit * 1.3);
-    const titleFontSize = Math.max(16, baseUnit * 1.6);
-    const descFontSize = Math.max(13, baseUnit * 1.3);
-    const descLineHeight = Math.max(18, baseUnit * 2.0);
-
+    const eventRadius = Math.max(6, baseUnit * 1.0);
+    const stemLength = Math.min(width * 0.25, 150);
+    const labelFontSize = Math.max(14, baseUnit * 1.5);
 
     // --- Draw Timeline Axis ---
     ctx.beginPath();
-    ctx.moveTo(padding, timelineY);
-    ctx.lineTo(width - padding, timelineY);
+    ctx.moveTo(timelineX, padding);
+    ctx.lineTo(timelineX, height - padding);
     ctx.strokeStyle = '#475569'; // slate-600
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -121,20 +105,16 @@ export const CosmicTimeline: React.FC = () => {
     // --- Draw Events ---
     eventPositions.current.clear();
     events.forEach((event, i) => {
-      const x = getEventX(event.time, width, padding);
+      const y = getEventY(event.time, height, padding);
       
-      // Stagger stem heights to prevent label overlap
-      const isTop = i % 2 === 0;
-      // Stagger pairs of events: (0,1) are short, (2,3) are long, (4,5) are short, etc.
-      const isLongStem = Math.floor(i / 2) % 2 !== 0; 
-      const currentStemHeight = isLongStem ? baseStemHeight * 1.6 : baseStemHeight;
-      const y = timelineY + (isTop ? -currentStemHeight : currentStemHeight);
+      const isLeft = i % 2 === 0;
+      const x = timelineX + (isLeft ? -stemLength : stemLength);
       
       eventPositions.current.set(event, { x, y, radius: eventRadius });
 
       // Stem
       ctx.beginPath();
-      ctx.moveTo(x, timelineY);
+      ctx.moveTo(timelineX, y);
       ctx.lineTo(x, y);
       ctx.strokeStyle = '#475569'; // slate-600
       ctx.stroke();
@@ -151,44 +131,14 @@ export const CosmicTimeline: React.FC = () => {
       // Label
       ctx.fillStyle = '#cbd5e1'; // slate-300
       ctx.font = `bold ${labelFontSize}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = (isTop) ? 'bottom' : 'top';
-      ctx.fillText(event.name, x, y + (isTop ? -eventRadius - 5 : eventRadius + 5));
+      ctx.textAlign = isLeft ? 'right' : 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(event.name, x + (isLeft ? -eventRadius - 10 : eventRadius + 10), y);
     });
-
-    // --- Draw Selected Event Info Box ---
-    if (selectedEvent) {
-      const boxWidth = Math.min(width * 0.8, 400);
-      const boxHeight = height * 0.4;
-      const boxX = (width - boxWidth) / 2;
-      const boxY = timelineY - boxHeight / 2;
-      const textPadding = 20;
-
-      ctx.fillStyle = 'rgba(30, 41, 59, 0.9)'; // slate-800 with alpha
-      ctx.strokeStyle = '#67e8f9'; // cyan-300
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
-      ctx.fill();
-      ctx.stroke();
-      
-      // Title
-      ctx.fillStyle = gradient;
-      ctx.font = `bold ${titleFontSize}px sans-serif`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(selectedEvent.name, boxX + textPadding, boxY + textPadding);
-
-      // Description
-      ctx.fillStyle = '#cbd5e1'; // slate-300
-      ctx.font = `${descFontSize}px sans-serif`;
-      wrapText(ctx, selectedEvent.description, boxX + textPadding, boxY + textPadding + titleFontSize + 5, boxWidth - textPadding * 2, descLineHeight);
-    }
-
   }, [dims, selectedEvent, hoveredEvent]);
   
   // --- Interactivity Handlers ---
-  const handleCanvasInteraction = (e: React.MouseEvent<HTMLCanvasElement>, isClick: boolean) => {
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -198,20 +148,62 @@ export const CosmicTimeline: React.FC = () => {
     let foundEvent = null;
     for (const [event, pos] of eventPositions.current.entries()) {
       const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-      if (distance < pos.radius + 5) { // Add padding for easier clicking
+      if (distance < pos.radius + 10) { // Add padding for easier clicking
         foundEvent = event;
         break;
       }
     }
     
-    if (isClick) {
-      // If clicking the currently selected event, deselect it. Otherwise, select the new one.
-      setSelectedEvent(prev => (prev === foundEvent ? null : foundEvent));
-    } else {
-      setHoveredEvent(foundEvent);
-      canvas.style.cursor = foundEvent ? 'pointer' : 'default';
+    // If clicking the currently selected event, deselect it. Otherwise, select new one.
+    const newSelectedEvent = selectedEvent === foundEvent ? null : foundEvent;
+    setSelectedEvent(newSelectedEvent);
+    
+    // Reset visualization if selection changes
+    if (selectedEvent !== newSelectedEvent) {
+        setVisualizationCode(null);
+        setVisualizationError(null);
     }
   };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+     const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let foundEvent = null;
+    for (const [event, pos] of eventPositions.current.entries()) {
+      const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
+      if (distance < pos.radius + 10) {
+        foundEvent = event;
+        break;
+      }
+    }
+    setHoveredEvent(foundEvent);
+    canvas.style.cursor = foundEvent ? 'pointer' : 'default';
+  };
+
+  const handleGenerateVisualization = useCallback(async () => {
+    if (!selectedEvent) return;
+
+    setIsGeneratingVis(true);
+    setVisualizationCode(null);
+    setVisualizationError(null);
+    try {
+      const code = await generateVisualizationCode(selectedEvent);
+      setVisualizationCode(code);
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+      if (errorMessage.toLowerCase().includes('api key not valid')) {
+        setVisualizationError('Your Gemini API key appears to be invalid or has expired. Please check your credentials.');
+      } else {
+        setVisualizationError(`The AI failed to generate the visualization. Error: ${errorMessage}`);
+      }
+    } finally {
+      setIsGeneratingVis(false);
+    }
+  }, [selectedEvent]);
 
 
   return (
@@ -220,19 +212,68 @@ export const CosmicTimeline: React.FC = () => {
         A Journey Through Cosmic Time
       </h2>
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
-        Explore 13.8 billion years of history, from the first moments of the universe to today. Click on an event to learn more.
+        Explore 13.8 billion years of history. Click on an event to learn more and generate a unique AI visualization.
       </p>
       <div className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden">
         <canvas 
           ref={canvasRef} 
-          style={{ width: '100%', height: '100%', display: 'block' }}
-          onClick={(e) => handleCanvasInteraction(e, true)}
-          onMouseMove={(e) => handleCanvasInteraction(e, false)}
+          style={{ width: dims.width, height: dims.height, display: 'block' }}
+          onClick={handleCanvasClick}
+          onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => setHoveredEvent(null)}
-          aria-label="Interactive cosmic timeline"
+          aria-label="Interactive vertical cosmic timeline"
           role="graphics-document"
         />
       </div>
+
+      {/* --- AI Visualization Section --- */}
+      {selectedEvent && (
+        <div className="mt-8 text-center animate-fade-in">
+          <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 max-w-3xl mx-auto">
+             <h3 className="text-2xl font-bold text-cyan-300">{selectedEvent.name}</h3>
+             <p className="text-slate-300 mt-2">{selectedEvent.description}</p>
+             
+            {!visualizationCode && !isGeneratingVis && (
+               <button
+                onClick={handleGenerateVisualization}
+                disabled={isGeneratingVis}
+                className="group mt-6 inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-cyan-500 to-purple-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500"
+              >
+                <SparklesIcon />
+                <span className="text-md font-semibold">Generate Visualization</span>
+              </button>
+             )}
+          </div>
+          
+          {isGeneratingVis && (
+             <div className="mt-6 flex flex-col items-center gap-4 text-cyan-300">
+                <LoadingIndicator />
+                <p>Asking the AI to visualize "{selectedEvent.name}"...</p>
+             </div>
+          )}
+
+          {visualizationError && (
+             <div className="mt-6 text-center text-red-400 p-4 bg-red-900/50 border border-red-700 rounded-lg max-w-3xl mx-auto">
+                <h3 className="text-lg font-bold mb-2">Generation Failed</h3>
+                <p>{visualizationError}</p>
+            </div>
+          )}
+
+          {visualizationCode && (
+            <div className="mt-8 animate-fade-in">
+                <h3 className="text-2xl font-bold text-cyan-300 mb-4">AI Visualization: {selectedEvent.name}</h3>
+                <div className="w-full min-h-[50vh] max-h-[70vh] aspect-video bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden flex items-center justify-center mx-auto">
+                    <iframe
+                        srcDoc={visualizationCode}
+                        title={`AI Generated Visualization for ${selectedEvent.name}`}
+                        className="w-full h-full rounded-lg border-0"
+                        sandbox="allow-scripts" // Security: restrict iframe capabilities but allow scripts to run
+                    />
+                </div>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 };
