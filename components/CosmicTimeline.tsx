@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
-import { SparklesIcon, ChatIcon } from './Icons';
+import { SparklesIcon, ChatIcon, CursorClickIcon } from './Icons';
 import { LoadingIndicator } from './LoadingIndicator';
 import { useTranslations } from '../contexts/LanguageContext';
 import type { CosmicEvent } from '../i18n/translations';
@@ -49,6 +49,7 @@ export const CosmicTimeline: React.FC = () => {
 
   const [isGeneratingVis, setIsGeneratingVis] = useState(false);
   const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
+  const [visualizationCache, setVisualizationCache] = useState<Record<string, string>>({});
   const [visualizationError, setVisualizationError] = useState<string | null>(null);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [ariaLiveText, setAriaLiveText] = useState('');
@@ -232,12 +233,17 @@ export const CosmicTimeline: React.FC = () => {
     const newSelectedEvent = selectedEvent === foundEvent ? null : foundEvent;
     
     if (selectedEvent !== newSelectedEvent) {
-      setVisualizationCode(null);
-      setVisualizationError(null);
+      if (newSelectedEvent) {
+        const cachedCode = visualizationCache[newSelectedEvent.name];
+        setVisualizationCode(cachedCode || null); // Set from cache or null
+      } else {
+        setVisualizationCode(null); // Clear if deselecting
+      }
+      setVisualizationError(null); // Always clear error on selection change
     }
 
     setSelectedEvent(newSelectedEvent);
-  }, [selectedEvent]);
+  }, [selectedEvent, visualizationCache]);
 
   const handleGenerateVisualization = useCallback(async () => {
     if (!selectedEvent) return;
@@ -249,6 +255,10 @@ export const CosmicTimeline: React.FC = () => {
     try {
       const code = await generateVisualizationCode(selectedEvent);
       setVisualizationCode(code);
+      setVisualizationCache(prevCache => ({
+        ...prevCache,
+        [selectedEvent.name]: code,
+      }));
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : t.errorUnknownErrorMessage;
       if (errorMessage.toLowerCase().includes('api key not valid')) {
@@ -276,6 +286,12 @@ export const CosmicTimeline: React.FC = () => {
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
         {t.timelineSubtitle}
       </p>
+
+      <div className="flex items-center justify-center gap-3 mb-6 text-cyan-300 animate-subtle-bounce" aria-hidden="true">
+        <CursorClickIcon />
+        <p className="font-semibold text-lg">{t.timelineCallToAction}</p>
+      </div>
+
       <div 
         className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative h-[75vh] overflow-y-auto no-scrollbar cursor-pointer"
         onMouseMove={handleMouseMove}

@@ -35,6 +35,10 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        'subtle-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out forwards',
@@ -44,6 +48,7 @@ export default {
         'gradient-flow': 'gradient-flow 6s ease-in-out infinite',
         'gradient-flow-fast': 'gradient-flow 3s ease-in-out infinite',
         'text-shimmer': 'text-shimmer 5s linear infinite',
+        'subtle-bounce': 'subtle-bounce 2s ease-in-out infinite',
       }
     },
   },

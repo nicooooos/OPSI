@@ -85,3 +85,9 @@ export const ChevronDownIcon: React.FC = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
   </svg>
 );
+
+export const CursorClickIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M21.75 12h-2.25m.166 5.834l-1.591-1.591M5.834 4.666l1.591 1.591M2.25 12h2.25m-.166 5.834l1.591-1.591" />
+    </svg>
+);
