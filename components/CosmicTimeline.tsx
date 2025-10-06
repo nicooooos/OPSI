@@ -51,6 +51,7 @@ export const CosmicTimeline: React.FC = () => {
   const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
   const [visualizationError, setVisualizationError] = useState<string | null>(null);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
+  const [ariaLiveText, setAriaLiveText] = useState('');
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
@@ -181,6 +182,17 @@ export const CosmicTimeline: React.FC = () => {
     }
   }, [visualizationCode, selectedEvent]);
 
+  // Update ARIA live region for screen readers
+  useEffect(() => {
+    if (selectedEvent) {
+      setAriaLiveText(`${t.timelineAriaEventSelected} ${selectedEvent.name}. ${selectedEvent.description}`);
+    } else if (hoveredEvent) {
+      setAriaLiveText(`${t.timelineAriaEventHover} ${hoveredEvent.name}.`);
+    } else {
+      setAriaLiveText('');
+    }
+  }, [selectedEvent, hoveredEvent, t]);
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const canvas = canvasRef.current;
     const container = e.currentTarget;
@@ -280,6 +292,10 @@ export const CosmicTimeline: React.FC = () => {
           aria-label={t.timelineAriaLabel}
           role="graphics-document"
         />
+        {/* Visually hidden element for screen reader announcements */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {ariaLiveText}
+        </div>
       </div>
 
       {selectedEvent && (

@@ -80,6 +80,11 @@ export const StarryBackground: React.FC = () => {
                     from { transform: translate(0, 0); }
                     to { transform: translate(50px, 120px); }
                 }
+
+                @keyframes twinkle {
+                    0%, 100% { opacity: 0.2; }
+                    50% { opacity: 0.8; }
+                }
                 
                 .stars-layer-1 {
                     background-size: 200px 200px;
@@ -97,6 +102,38 @@ export const StarryBackground: React.FC = () => {
                     background-size: 500px 500px;
                     opacity: 1;
                     animation: drift-3 90s linear infinite alternate;
+                }
+                
+                /* Add pseudo elements for twinkling stars */
+                .stars-animated-bg::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-repeat: repeat;
+                }
+
+                .stars-layer-1::after {
+                    background-image: radial-gradient(1px 1px at 70px 80px, #fff, rgba(0,0,0,0));
+                    background-size: 200px 200px;
+                    animation: twinkle 11s linear infinite alternate;
+                    animation-delay: 2.3s;
+                }
+
+                .stars-layer-2::after {
+                    background-image: radial-gradient(1px 1px at 10px 100px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 150px 200px, #fff, rgba(0,0,0,0));
+                    background-size: 300px 300px;
+                    animation: twinkle 8s linear infinite alternate-reverse;
+                    animation-delay: 0.7s;
+                }
+
+                .stars-layer-3::after {
+                    background-image: radial-gradient(2px 2px at 250px 100px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 30px 30px, #ddd, rgba(0,0,0,0));
+                    background-size: 500px 500px;
+                    animation: twinkle 13s linear infinite alternate;
+                    animation-delay: 1.5s;
                 }
                 `}
             </style>

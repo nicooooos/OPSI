@@ -25,6 +25,8 @@ export interface TranslationSet {
   timelineTitle: string;
   timelineSubtitle: string;
   timelineAriaLabel: string;
+  timelineAriaEventHover: string;
+  timelineAriaEventSelected: string;
   buttonGenerateVis: string;
   visLoadingMessage: string; //
   visFunFactMessage: string;
@@ -82,6 +84,8 @@ export const translations: Record<'en' | 'id', TranslationSet> = {
     timelineTitle: "A Journey Through Cosmic Time",
     timelineSubtitle: "Explore 13.8 billion years of history. Click on an event to learn more and generate a unique AI visualization.",
     timelineAriaLabel: "Interactive vertical cosmic timeline",
+    timelineAriaEventHover: "Hovering on event:",
+    timelineAriaEventSelected: "Selected event:",
     buttonGenerateVis: "Generate Visualization",
     visLoadingMessage: "Asking the AI to visualize \"{eventName}\"...",
     visFunFactMessage: "This can take a moment. While you wait, here's a fun fact:",
@@ -207,6 +211,8 @@ export const translations: Record<'en' | 'id', TranslationSet> = {
     timelineTitle: "Perjalanan Melalui Waktu Kosmik",
     timelineSubtitle: "Jelajahi 13,8 miliar tahun sejarah. Klik pada sebuah peristiwa untuk belajar lebih lanjut dan hasilkan visualisasi AI yang unik.",
     timelineAriaLabel: "Linimasa kosmik vertikal yang interaktif",
+    timelineAriaEventHover: "Melayang di atas peristiwa:",
+    timelineAriaEventSelected: "Peristiwa terpilih:",
     buttonGenerateVis: "Hasilkan Visualisasi",
     visLoadingMessage: "Meminta AI untuk memvisualisasikan \"{eventName}\"...",
     visFunFactMessage: "Ini mungkin perlu waktu sejenak. Sambil menunggu, ini fakta menarik:",
