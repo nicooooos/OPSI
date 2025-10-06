@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { BackIcon } from './Icons';
+import { BackIcon, ClearIcon } from './Icons';
 import { useTranslations } from '../contexts/LanguageContext';
 
 interface HeaderProps {
     onBack: () => void;
+    onClearChat: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onBack }) => {
+export const Header: React.FC<HeaderProps> = ({ onBack, onClearChat }) => {
   const { t } = useTranslations();
   return (
     <header className="relative text-center p-4 z-10 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
@@ -25,6 +26,14 @@ export const Header: React.FC<HeaderProps> = ({ onBack }) => {
         </h1>
         <p className="text-slate-400 text-sm">{t.headerSubtitle}</p>
       </div>
+      <button 
+        onClick={onClearChat}
+        className="absolute right-4 p-2 text-slate-400 hover:text-white transition-colors duration-200 rounded-full hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        aria-label="Clear chat"
+        title="Clear Chat"
+      >
+        <ClearIcon />
+      </button>
     </header>
   );
 };

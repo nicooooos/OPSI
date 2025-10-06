@@ -32,7 +32,7 @@ export const Message: React.FC<MessageProps> = ({ message, index }) => {
 
   return (
     <div
-      className={`relative flex items-start gap-3 w-full animate-fade-in ${containerClasses}`}
+      className={`relative flex items-start gap-3 w-full animate-fade-in-up ${containerClasses}`}
     >
       {isModel && (
          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-cyan-400 flex items-center justify-center shadow-lg">

@@ -11,13 +11,14 @@ export const PromptSuggestions: React.FC<PromptSuggestionsProps> = ({ onPromptCl
   const suggestions = t.promptSuggestions;
 
   return (
-    <div className="w-full max-w-xl lg:max-w-3xl mx-auto p-4 animate-fade-in mt-4">
+    <div className="w-full max-w-xl lg:max-w-3xl mx-auto p-4 mt-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {suggestions.map((prompt, index) => (
           <button
             key={index}
             onClick={() => onPromptClick(prompt)}
-            className="p-3 bg-slate-800/80 border border-slate-700 rounded-lg text-left text-slate-300 hover:bg-slate-700 hover:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 text-sm"
+            className="p-3 bg-slate-800/80 border border-slate-700 rounded-lg text-left text-slate-300 hover:bg-slate-700 hover:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200 text-sm animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
             aria-label={`Ask: ${prompt}`}
           >
             {prompt}

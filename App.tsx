@@ -126,6 +126,15 @@ const App: React.FC = () => {
     setError(null);
   }, []);
 
+  const handleClearChat = useCallback(() => {
+    setMessages([
+      {
+        role: MessageRole.MODEL,
+        content: t.astroChatGreeting,
+      },
+    ]);
+  }, [t.astroChatGreeting]);
+
   const handleSendMessage = useCallback(async (text: string) => {
     if (isLoading || !text.trim() || !chat) return;
 
@@ -179,7 +188,7 @@ const App: React.FC = () => {
       <LanguageSwitcher />
       <ErrorDisplay error={error} onClose={handleDismissError} />
       
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 z-10 flex flex-col gap-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 z-10 flex flex-col gap-12 animate-fade-in-up">
         <CosmicTimeline />
 
         <div className="border-t-2 border-dashed border-slate-700/50" aria-hidden="true"></div>
@@ -189,7 +198,7 @@ const App: React.FC = () => {
             <EducationLevelSelector onSelectLevel={handleSelectLevel} />
           ) : (
             <>
-              <Header onBack={handleBack} />
+              <Header onBack={handleBack} onClearChat={handleClearChat} />
               <main className="flex-1 flex flex-col p-4 overflow-y-auto">
                 <ChatWindow messages={messages} isLoading={isLoading} />
                 {messages.length === 1 && !isLoading && (
