@@ -62,6 +62,16 @@ export const CosmicTimeline: React.FC = () => {
     startPanY: 0,
   });
 
+  // Cleanup effect for scroll lock
+  useEffect(() => {
+    // This is a cleanup function that runs when the component unmounts.
+    // It ensures that if the user navigates away while panning, the scroll
+    // lock is removed from the page.
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, []); // Empty dependency array means this runs only on mount and unmount.
+
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
       if (entries?.[0]) {
@@ -190,6 +200,9 @@ export const CosmicTimeline: React.FC = () => {
   }, [visualizationCode]);
   
   const handlePanStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // Prevent the entire page from scrolling when a pan gesture starts on the canvas.
+    document.body.classList.add('no-scroll');
+    
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     e.currentTarget.style.cursor = 'grabbing';
@@ -247,6 +260,9 @@ export const CosmicTimeline: React.FC = () => {
   }, [dims.height, panOffsetY]);
 
   const handlePanEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // Re-enable page scrolling when the pan gesture ends.
+    document.body.classList.remove('no-scroll');
+
     e.currentTarget.releasePointerCapture(e.pointerId);
     panState.current.isPanning = false;
     e.currentTarget.style.cursor = hoveredEvent ? 'pointer' : 'grab';

@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+  Custom utility to prevent the body from scrolling.
+  This is used by the CosmicTimeline component to lock the page
+  while the user is panning the timeline on mobile devices.
+*/
+body.no-scroll {
+  overflow: hidden;
+}
