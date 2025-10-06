@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onBack, onClearChat }) => {
         <BackIcon />
       </button>
       <div className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text bg-[length:200%_auto] animate-gradient-flow">
           AstroChat AI
         </h1>
         <p className="text-slate-400 text-sm">{t.headerSubtitle}</p>

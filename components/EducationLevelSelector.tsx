@@ -14,7 +14,7 @@ export const EducationLevelSelector: React.FC<EducationLevelSelectorProps> = ({ 
   return (
     <div className="z-10 flex flex-col items-center justify-center h-full text-white animate-fade-in p-4">
       <div className="text-center w-full max-w-2xl p-8 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700 shadow-2xl">
-        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2 bg-[length:200%_auto] animate-gradient-flow">
           {t.welcomeToAstroChat}
         </h1>
         <p className="text-slate-400 mb-8 text-base sm:text-lg">{t.selectLevelPrompt}</p>

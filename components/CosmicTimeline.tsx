@@ -258,7 +258,7 @@ export const CosmicTimeline: React.FC = () => {
       <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-100 mb-4">
         Time Traveller
       </h1>
-      <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2">
+      <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2 bg-[length:200%_auto] animate-gradient-flow">
         {t.timelineTitle}
       </h2>
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
@@ -279,7 +279,7 @@ export const CosmicTimeline: React.FC = () => {
       {selectedEvent && (
         <div className="mt-8 text-center animate-fade-in" ref={visualizationSectionRef}>
           <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 max-w-3xl mx-auto">
-             <h3 className="text-2xl font-bold text-cyan-300">{selectedEvent.name}</h3>
+             <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-300 via-purple-400 to-pink-500 text-transparent bg-clip-text bg-[length:200%_auto] animate-gradient-flow">{selectedEvent.name}</h3>
              <p className="text-slate-300 mt-2">{selectedEvent.description}</p>
              
             {!visualizationCode && !isGeneratingVis && (

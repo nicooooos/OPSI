@@ -24,12 +24,17 @@ export default {
           'from': { opacity: '0' },
           'to': { opacity: '1' },
         },
+        'gradient-flow': {
+            '0%, 100%': { backgroundPosition: '0% 50%' },
+            '50%': { backgroundPosition: '100% 50%' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.4s ease-out forwards',
         'fade-in-fast-popup': 'fade-in-fast-popup 0.3s ease-out forwards',
         'fade-in-fast-modal': 'fade-in-fast-modal 0.2s ease-out forwards',
+        'gradient-flow': 'gradient-flow 6s ease-in-out infinite',
       }
     },
   },

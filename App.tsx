@@ -13,6 +13,7 @@ import { CosmicTimeline } from './components/CosmicTimeline';
 import { CloseIcon, WarningIcon } from './components/Icons';
 import { PromptSuggestions } from './components/PromptSuggestions';
 import { useTranslations } from './contexts/LanguageContext';
+import { audioService } from './services/audioService';
 
 // --- Helper Component for Error Display ---
 interface AppError {
@@ -87,6 +88,7 @@ const App: React.FC = () => {
 
   const handleSelectLevel = useCallback((level: EducationLevel) => {
     try {
+      audioService.playSelectSound();
       const chatSession = createChatSession(level, language);
       setChat(chatSession);
       setMessages([
@@ -127,6 +129,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleClearChat = useCallback(() => {
+    audioService.playClearSound();
     setMessages([
       {
         role: MessageRole.MODEL,
@@ -137,7 +140,8 @@ const App: React.FC = () => {
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (isLoading || !text.trim() || !chat) return;
-
+    
+    audioService.playSendSound();
     setIsLoading(true);
     setError(null);
 
@@ -183,7 +187,7 @@ const App: React.FC = () => {
   }, [chat, isLoading, t]);
 
   return (
-    <div className="relative flex flex-col min-h-screen w-screen overflow-x-hidden antialiased bg-slate-900 text-white">
+    <div className="relative flex flex-col min-h-screen w-full overflow-x-hidden antialiased bg-slate-900 text-white">
       <StarryBackground />
       <LanguageSwitcher />
       <ErrorDisplay error={error} onClose={handleDismissError} />
