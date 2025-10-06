@@ -192,7 +192,7 @@ const App: React.FC = () => {
   }, [chat, isLoading, t]);
 
   return (
-    <div className="relative flex flex-col min-h-screen w-full overflow-x-hidden antialiased bg-slate-900 text-white">
+    <div className="relative flex flex-col min-h-screen w-full overflow-x-hidden antialiased text-white">
       <StarryBackground />
       <GlobalControls />
       <ErrorDisplay error={error} onClose={handleDismissError} />

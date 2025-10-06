@@ -38,6 +38,7 @@ interface EventPosition {
 export const CosmicTimeline: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const visualizationSectionRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslations();
   const events = t.events;
@@ -51,6 +52,15 @@ export const CosmicTimeline: React.FC = () => {
   const [visualizationCode, setVisualizationCode] = useState<string | null>(null);
   const [visualizationError, setVisualizationError] = useState<string | null>(null);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
+
+  // New state for panning
+  const [panOffsetY, setPanOffsetY] = useState(0);
+  const panState = useRef({
+    isPanning: false,
+    didPan: false,
+    startY: 0,
+    startPanY: 0,
+  });
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
@@ -178,53 +188,102 @@ export const CosmicTimeline: React.FC = () => {
       }, 100);
     }
   }, [visualizationCode]);
+  
+  const handlePanStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.currentTarget.style.cursor = 'grabbing';
+    
+    panState.current.isPanning = true;
+    panState.current.didPan = false;
+    panState.current.startY = e.clientY;
+    panState.current.startPanY = panOffsetY;
+  }, [panOffsetY]);
+  
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (panState.current.isPanning) {
+        // Panning logic
+        const deltaY = e.clientY - panState.current.startY;
+        if (!panState.current.didPan && Math.abs(deltaY) > 5) {
+            panState.current.didPan = true;
+            setHoveredEvent(null); // Clear hover when panning starts
+        }
+        if (!panState.current.didPan) return;
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+        let newY = panState.current.startPanY + deltaY;
 
-    let foundEvent: CosmicEvent | null = null;
-    for (const [event, pos] of eventPositions.current.entries()) {
-      if (Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2) < pos.radius + 10) {
-        foundEvent = event;
-        break;
-      }
+        const container = canvasContainerRef.current;
+        if (container) {
+            const containerHeight = container.clientHeight;
+            const canvasHeight = dims.height;
+            if (canvasHeight > containerHeight) {
+                const minY = containerHeight - canvasHeight;
+                const maxY = 0;
+                newY = Math.max(minY, Math.min(newY, maxY));
+            } else {
+                newY = 0;
+            }
+        }
+        setPanOffsetY(newY);
+    } else {
+        // Hover logic
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const transformedY = y - panOffsetY;
+
+        let foundEvent: CosmicEvent | null = null;
+        for (const [event, pos] of eventPositions.current.entries()) {
+            if (Math.sqrt((x - pos.x) ** 2 + (transformedY - pos.y) ** 2) < pos.radius + 10) {
+                foundEvent = event;
+                break;
+            }
+        }
+        setHoveredEvent(foundEvent);
+        e.currentTarget.style.cursor = foundEvent ? 'pointer' : 'grab';
     }
+  }, [dims.height, panOffsetY]);
+
+  const handlePanEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    panState.current.isPanning = false;
+    e.currentTarget.style.cursor = hoveredEvent ? 'pointer' : 'grab';
     
-    const newSelectedEvent = selectedEvent === foundEvent ? null : foundEvent;
-    setSelectedEvent(newSelectedEvent);
-    
-    if (selectedEvent !== newSelectedEvent) {
-        setVisualizationCode(null);
-        setVisualizationError(null);
-        if (newSelectedEvent) {
-            setTimeout(() => {
-                visualizationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
+    // If it wasn't a pan, it was a click.
+    if (!panState.current.didPan) {
+        // --- Execute Click Logic ---
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const transformedY = y - panOffsetY;
+
+        let foundEvent: CosmicEvent | null = null;
+        for (const [event, pos] of eventPositions.current.entries()) {
+            if (Math.sqrt((x - pos.x) ** 2 + (transformedY - pos.y) ** 2) < pos.radius + 10) {
+                foundEvent = event;
+                break;
+            }
+        }
+        
+        const newSelectedEvent = selectedEvent === foundEvent ? null : foundEvent;
+        setSelectedEvent(newSelectedEvent);
+        
+        if (selectedEvent !== newSelectedEvent) {
+            setVisualizationCode(null);
+            setVisualizationError(null);
+            if (newSelectedEvent) {
+                setTimeout(() => {
+                    visualizationSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
         }
     }
-  };
+  }, [selectedEvent, panOffsetY, hoveredEvent]);
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    let foundEvent: CosmicEvent | null = null;
-    for (const [event, pos] of eventPositions.current.entries()) {
-        if (Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2) < pos.radius + 10) {
-            foundEvent = event;
-            break;
-        }
-    }
-    setHoveredEvent(foundEvent);
-    canvas.style.cursor = foundEvent ? 'pointer' : 'default';
-  };
 
   const handleGenerateVisualization = useCallback(async () => {
     if (!selectedEvent) return;
@@ -263,13 +322,29 @@ export const CosmicTimeline: React.FC = () => {
       <p className="text-slate-400 mb-8 text-lg max-w-3xl mx-auto">
         {t.timelineSubtitle}
       </p>
-      <div className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden">
+      <div 
+        ref={canvasContainerRef}
+        className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative overflow-hidden h-[75vh] sm:h-auto"
+        style={{ touchAction: 'pan-y', cursor: 'grab' }}
+        onPointerDown={handlePanStart}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePanEnd}
+        onPointerCancel={handlePanEnd}
+        onPointerLeave={(e) => {
+          if (!panState.current.isPanning) {
+            setHoveredEvent(null);
+            e.currentTarget.style.cursor = 'grab';
+          }
+        }}
+        >
         <canvas 
           ref={canvasRef} 
-          style={{ width: dims.width, height: dims.height, display: 'block' }}
-          onClick={handleCanvasClick}
-          onMouseMove={handleCanvasMouseMove}
-          onMouseLeave={() => setHoveredEvent(null)}
+          style={{ 
+            width: dims.width, 
+            height: dims.height, 
+            display: 'block',
+            transform: `translateY(${panOffsetY}px)`,
+           }}
           aria-label={t.timelineAriaLabel}
           role="graphics-document"
         />
