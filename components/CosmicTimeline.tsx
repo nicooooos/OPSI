@@ -77,14 +77,17 @@ export const CosmicTimeline: React.FC = () => {
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, width, height);
 
+    const isMobile = width < 640;
     const padding = 60;
     const timelineX = width / 2;
-    const baseUnit = width / 100;
-    const eventRadius = Math.max(5, baseUnit * 0.8);
-    const stemLength = Math.min(width * 0.2, 200); // Adjusted for more text space
-    const labelFontSize = Math.max(11, baseUnit * 1.5); // Adjusted for mobile
-    const yearFontSize = Math.max(10, baseUnit * 1.2); // Adjusted for mobile
-    const minVerticalSeparation = labelFontSize + yearFontSize + 15;
+    
+    const eventRadius = isMobile ? 5 : 7;
+    const stemLength = isMobile ? 40 : Math.min(width * 0.2, 200);
+    const labelFontSize = isMobile ? 12 : 15;
+    const yearFontSize = isMobile ? 10 : 12;
+    const minVerticalSeparation = labelFontSize + yearFontSize + (isMobile ? 15 : 25);
+    const textPadding = 15;
+    const canvasEdgePadding = 10;
 
     // --- Pass 1: Calculate initial positions and correct for overlaps ---
     const drawData = events.map((event, i) => {
@@ -142,18 +145,22 @@ export const CosmicTimeline: React.FC = () => {
       ctx.fill();
       ctx.stroke();
 
-      const textX = x + (isLeft ? -eventRadius - 12 : eventRadius + 12);
+      const textX = x + (isLeft ? -eventRadius - textPadding : eventRadius + textPadding);
       ctx.textAlign = isLeft ? 'right' : 'left';
+
+      const textMaxWidth = isLeft
+        ? textX - canvasEdgePadding
+        : width - textX - canvasEdgePadding;
       
       ctx.fillStyle = '#cbd5e1';
       ctx.font = `bold ${labelFontSize}px sans-serif`;
       ctx.textBaseline = 'bottom';
-      ctx.fillText(event.name, textX, y - 2);
+      ctx.fillText(event.name, textX, y - 2, textMaxWidth);
       
       ctx.fillStyle = '#94a3b8';
       ctx.font = `${yearFontSize}px sans-serif`;
       ctx.textBaseline = 'top';
-      ctx.fillText(formatTime(event.time, t), textX, y + 2);
+      ctx.fillText(formatTime(event.time, t), textX, y + 2, textMaxWidth);
     });
   }, [dims, selectedEvent, hoveredEvent, events, t]);
   
@@ -285,10 +292,10 @@ export const CosmicTimeline: React.FC = () => {
                <button
                 onClick={handleGenerateVisualization}
                 disabled={isGeneratingVis}
-                className="group mt-6 inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-cyan-500 to-purple-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500"
+                className="group mt-6 inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-cyan-500 to-purple-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-400 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-cyan-500/40"
               >
                 <SparklesIcon />
-                <span className="text-md font-semibold">{t.buttonGenerateVis}</span>
+                <span className="text-lg font-semibold">{t.buttonGenerateVis}</span>
               </button>
              )}
           </div>
@@ -305,10 +312,10 @@ export const CosmicTimeline: React.FC = () => {
     
                 <button
                     onClick={handleScrollToChat}
-                    className="relative group mt-8 inline-flex items-center gap-3 px-6 py-3 font-semibold rounded-xl text-slate-300 bg-slate-900 border-2 border-transparent bg-clip-padding before:content-[''] before:absolute before:inset-0 before:z-[-1] before:m-[-2px] before:rounded-xl before:bg-gradient-to-r before:from-pink-500 before:via-red-500 before:via-yellow-500 before:via-green-400 before:to-cyan-400 before:bg-[length:200%_auto] before:animate-gradient-flow-fast transition-transform transform hover:scale-105 group-hover:text-white"
+                    className="relative group mt-10 inline-flex items-center gap-3 px-8 py-4 rounded-xl text-slate-200 bg-slate-900 border-2 border-transparent bg-clip-padding before:content-[''] before:absolute before:inset-0 before:z-[-1] before:m-[-2px] before:rounded-xl before:bg-gradient-to-r before:from-pink-500 before:via-red-500 before:via-yellow-500 before:via-green-400 before:to-cyan-400 before:bg-[length:200%_auto] before:animate-gradient-flow-fast transition-transform transform hover:scale-105 group-hover:text-white"
                 >
                     <ChatIcon />
-                    <span>{t.buttonAskWhileWaiting}</span>
+                    <span className="text-lg font-bold">{t.buttonAskWhileWaiting}</span>
                 </button>
              </div>
           )}
