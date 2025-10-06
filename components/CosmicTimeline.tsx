@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
-import { SparklesIcon } from './Icons';
+import { SparklesIcon, ChatIcon } from './Icons';
 import { LoadingIndicator } from './LoadingIndicator';
 import { useTranslations } from '../contexts/LanguageContext';
 import type { CosmicEvent } from '../i18n/translations';
@@ -305,9 +305,10 @@ export const CosmicTimeline: React.FC = () => {
     
                 <button
                     onClick={handleScrollToChat}
-                    className="mt-4 px-5 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500"
+                    className="group mt-8 inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-cyan-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 animate-pulse-glow"
                 >
-                    {t.buttonAskWhileWaiting}
+                    <ChatIcon />
+                    <span>{t.buttonAskWhileWaiting}</span>
                 </button>
              </div>
           )}
