@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
-import { SparklesIcon, ChatIcon, ChevronUpIcon, ChevronDownIcon } from './Icons';
+import { SparklesIcon, ChatIcon } from './Icons';
 import { LoadingIndicator } from './LoadingIndicator';
 import { useTranslations } from '../contexts/LanguageContext';
 import type { CosmicEvent } from '../i18n/translations';
@@ -38,7 +38,6 @@ interface EventPosition {
 export const CosmicTimeline: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const visualizationSectionRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslations();
   const events = t.events;
@@ -82,9 +81,9 @@ export const CosmicTimeline: React.FC = () => {
     const timelineX = width / 2;
     const baseUnit = width / 100;
     const eventRadius = Math.max(5, baseUnit * 0.8);
-    const stemLength = Math.min(width * 0.3, 200);
-    const labelFontSize = Math.max(12, baseUnit * 1.6);
-    const yearFontSize = Math.max(10, baseUnit * 1.3);
+    const stemLength = Math.min(width * 0.2, 200); // Adjusted for more text space
+    const labelFontSize = Math.max(11, baseUnit * 1.5); // Adjusted for mobile
+    const yearFontSize = Math.max(10, baseUnit * 1.2); // Adjusted for mobile
     const minVerticalSeparation = labelFontSize + yearFontSize + 15;
 
     // --- Pass 1: Calculate initial positions and correct for overlaps ---
@@ -221,16 +220,6 @@ export const CosmicTimeline: React.FC = () => {
     setSelectedEvent(newSelectedEvent);
   }, [selectedEvent]);
 
-  const handleScroll = (direction: 'up' | 'down') => {
-      const container = canvasContainerRef.current;
-      if (!container) return;
-      const scrollAmount = 250;
-      container.scrollBy({
-          top: direction === 'up' ? -scrollAmount : scrollAmount,
-          behavior: 'smooth'
-      });
-  };
-
   const handleGenerateVisualization = useCallback(async () => {
     if (!selectedEvent) return;
 
@@ -269,7 +258,6 @@ export const CosmicTimeline: React.FC = () => {
         {t.timelineSubtitle}
       </p>
       <div 
-        ref={canvasContainerRef}
         className="w-full bg-slate-900/70 rounded-xl border-2 border-slate-700 shadow-2xl p-2 relative h-[75vh] overflow-y-auto no-scrollbar cursor-pointer"
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHoveredEvent(null)}
@@ -285,22 +273,6 @@ export const CosmicTimeline: React.FC = () => {
           aria-label={t.timelineAriaLabel}
           role="graphics-document"
         />
-        <div className="sm:hidden fixed bottom-12 right-6 z-10 flex flex-col gap-2">
-            <button 
-                onClick={() => handleScroll('up')}
-                className="p-3 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-full text-slate-300 hover:bg-slate-700 active:scale-95 transition-all"
-                aria-label="Scroll timeline up"
-            >
-                <ChevronUpIcon />
-            </button>
-             <button 
-                onClick={() => handleScroll('down')}
-                className="p-3 bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-full text-slate-300 hover:bg-slate-700 active:scale-95 transition-all"
-                aria-label="Scroll timeline down"
-            >
-                <ChevronDownIcon />
-            </button>
-        </div>
       </div>
 
       {selectedEvent && (
