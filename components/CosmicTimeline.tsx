@@ -305,7 +305,7 @@ export const CosmicTimeline: React.FC = () => {
     
                 <button
                     onClick={handleScrollToChat}
-                    className="group mt-8 inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-cyan-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 animate-pulse-glow"
+                    className="relative group mt-8 inline-flex items-center gap-3 px-6 py-3 font-semibold rounded-xl text-slate-300 bg-slate-900 border-2 border-transparent bg-clip-padding before:content-[''] before:absolute before:inset-0 before:z-[-1] before:m-[-2px] before:rounded-xl before:bg-gradient-to-r before:from-pink-500 before:via-red-500 before:via-yellow-500 before:via-green-400 before:to-cyan-400 before:bg-[length:200%_auto] before:animate-gradient-flow-fast transition-transform transform hover:scale-105 group-hover:text-white"
                 >
                     <ChatIcon />
                     <span>{t.buttonAskWhileWaiting}</span>

@@ -35,16 +35,6 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
-        'pulse-glow': {
-          '0%, 100%': {
-            transform: 'scale(1)',
-            boxShadow: '0 0 15px -5px theme(colors.cyan.400), 0 0 30px -10px theme(colors.purple.500)',
-          },
-          '50%': {
-            transform: 'scale(1.05)',
-            boxShadow: '0 0 25px 0px theme(colors.cyan.300), 0 0 45px -5px theme(colors.purple.400)',
-          },
-        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out forwards',
@@ -52,8 +42,8 @@ export default {
         'fade-in-fast-popup': 'fade-in-fast-popup 0.3s ease-out forwards',
         'fade-in-fast-modal': 'fade-in-fast-modal 0.2s ease-out forwards',
         'gradient-flow': 'gradient-flow 6s ease-in-out infinite',
+        'gradient-flow-fast': 'gradient-flow 3s ease-in-out infinite',
         'text-shimmer': 'text-shimmer 5s linear infinite',
-        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
       }
     },
   },
