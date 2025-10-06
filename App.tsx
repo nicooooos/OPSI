@@ -14,6 +14,8 @@ import { CloseIcon, WarningIcon } from './components/Icons';
 import { PromptSuggestions } from './components/PromptSuggestions';
 import { useTranslations } from './contexts/LanguageContext';
 import { audioService } from './services/audioService';
+import { backgroundMusicService } from './services/backgroundMusicService';
+import { MusicToggleButton } from './components/MusicToggleButton';
 
 // --- Helper Component for Error Display ---
 interface AppError {
@@ -54,13 +56,15 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onClose }) => {
   );
 };
 
-const LanguageSwitcher: React.FC = () => {
+const GlobalControls: React.FC = () => {
     const { language, setLanguage } = useTranslations();
 
     return (
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-            <button onClick={() => setLanguage('en')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'en' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>EN</button>
-            <button onClick={() => setLanguage('id')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'id' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>ID</button>
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-slate-900/50 backdrop-blur-sm p-1.5 rounded-full border border-slate-700">
+            <MusicToggleButton />
+            <div className="w-px h-5 bg-slate-600 mx-1" />
+            <button onClick={() => setLanguage('en')} className={`px-3 py-1 text-sm rounded-full transition-colors ${language === 'en' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700'}`}>EN</button>
+            <button onClick={() => setLanguage('id')} className={`px-3 py-1 text-sm rounded-full transition-colors ${language === 'id' ? 'bg-cyan-500 text-white font-bold' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700'}`}>ID</button>
         </div>
     );
 };
@@ -89,6 +93,7 @@ const App: React.FC = () => {
   const handleSelectLevel = useCallback((level: EducationLevel) => {
     try {
       audioService.playSelectSound();
+      backgroundMusicService.play(); // Start music on first interaction
       const chatSession = createChatSession(level, language);
       setChat(chatSession);
       setMessages([
@@ -189,7 +194,7 @@ const App: React.FC = () => {
   return (
     <div className="relative flex flex-col min-h-screen w-full overflow-x-hidden antialiased bg-slate-900 text-white">
       <StarryBackground />
-      <LanguageSwitcher />
+      <GlobalControls />
       <ErrorDisplay error={error} onClose={handleDismissError} />
       
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 z-10 flex flex-col gap-12 animate-fade-in-up">

@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundSize: {
+        'size-200': '200% auto',
+      },
       keyframes: {
         'fade-in': {
           'from': { opacity: '0', transform: 'translateY(10px)' },
@@ -28,6 +31,10 @@ export default {
             '0%, 100%': { backgroundPosition: '0% 50%' },
             '50%': { backgroundPosition: '100% 50%' },
         },
+        'text-shimmer': {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out forwards',
@@ -35,6 +42,7 @@ export default {
         'fade-in-fast-popup': 'fade-in-fast-popup 0.3s ease-out forwards',
         'fade-in-fast-modal': 'fade-in-fast-modal 0.2s ease-out forwards',
         'gradient-flow': 'gradient-flow 6s ease-in-out infinite',
+        'text-shimmer': 'text-shimmer 5s linear infinite',
       }
     },
   },

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { generateVisualizationCode } from '../services/geminiService';
 import { SparklesIcon } from './Icons';
@@ -255,7 +254,7 @@ export const CosmicTimeline: React.FC = () => {
 
   return (
     <section className="text-center w-full" ref={containerRef}>
-      <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-100 mb-4">
+      <h1 className="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-400 via-white to-slate-400 mb-4 tracking-widest bg-size-200 animate-text-shimmer drop-shadow-[0_0_8px_rgba(200,200,255,0.2)]">
         Time Traveller
       </h1>
       <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 text-transparent bg-clip-text mb-2 bg-[length:200%_auto] animate-gradient-flow">
